@@ -4,7 +4,7 @@
 package lms
 
 import (
-	"github.com/trailofbits/lms/lms/common"
+	"github.com/trailofbits/lms-go/lms/common"
 
 	"crypto/subtle"
 	"encoding/binary"

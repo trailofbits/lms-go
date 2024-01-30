@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trailofbits/lms/lms/common"
-	"github.com/trailofbits/lms/lms/ots"
+	"github.com/trailofbits/lms-go/lms/common"
+	"github.com/trailofbits/lms-go/lms/ots"
 )
 
 func testOtsSignVerify(t *testing.T, otstc common.LmsOtsAlgorithmType) {

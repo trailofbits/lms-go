@@ -26,7 +26,7 @@ was internally reviewed by cryptographers at Trail of Bits.
 ## Installation
 
 ```
-go get https://github.com/trailofbits/lms/lms-go
+go get https://github.com/trailofbits/lms-go
 ```
 
 ## Usage

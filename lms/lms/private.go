@@ -7,8 +7,8 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/trailofbits/lms/lms/common"
-	"github.com/trailofbits/lms/lms/ots"
+	"github.com/trailofbits/lms-go/lms/common"
+	"github.com/trailofbits/lms-go/lms/ots"
 
 	"crypto/rand"
 	"hash"

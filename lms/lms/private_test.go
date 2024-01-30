@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trailofbits/lms/lms/common"
-	"github.com/trailofbits/lms/lms/lms"
+	"github.com/trailofbits/lms-go/lms/common"
+	"github.com/trailofbits/lms-go/lms/lms"
 )
 
 func TestPKTreeKAT1(t *testing.T) {

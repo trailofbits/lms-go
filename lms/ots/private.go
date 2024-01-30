@@ -4,7 +4,7 @@
 package ots
 
 import (
-	"github.com/trailofbits/lms/lms/common"
+	"github.com/trailofbits/lms-go/lms/common"
 
 	"crypto/rand"
 	"encoding/binary"

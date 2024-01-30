@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/trailofbits/lms/lms/lms"
+	"github.com/trailofbits/lms-go/lms/lms"
 )
 
 func TestVerify(t *testing.T) {

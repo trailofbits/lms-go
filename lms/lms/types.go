@@ -1,8 +1,8 @@
 package lms
 
 import (
-	"github.com/trailofbits/lms/lms/common"
-	"github.com/trailofbits/lms/lms/ots"
+	"github.com/trailofbits/lms-go/lms/common"
+	"github.com/trailofbits/lms-go/lms/ots"
 )
 
 // A LmsPrivateKey is used to sign a finite number of messages

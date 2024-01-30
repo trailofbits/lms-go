@@ -7,7 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/trailofbits/lms/lms/common"
+	"github.com/trailofbits/lms-go/lms/common"
 )
 
 // LmsOtsSignatureFromBytes returns an LmsOtsSignature represented by b.

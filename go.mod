@@ -1,4 +1,4 @@
-module github.com/trailofbits/lms
+module github.com/trailofbits/lms-go
 
 go 1.21
 

@@ -32,7 +32,7 @@ go get https://github.com/trailofbits/lms-go
 ## Usage
 
 ```go
-seckey    := lms.NewPrivateKey(common.LMS_SHA256_M32_H10, common.LMOTS_SHA256_N32_W4, /* some 16 byte id */)
+seckey    := lms.NewPrivateKey(common.LMS_SHA256_M32_H10, common.LMOTS_SHA256_N32_W4)
 pubkey    := seckey.Public()
 // The optional nil argument can be a user-chosen RNG
 sig, err  := seckey.Sign([]byte("example"), nil)

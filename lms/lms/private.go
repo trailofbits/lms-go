@@ -24,7 +24,7 @@ func hash_write(h hash.Hash, x []byte) {
 
 // NewPrivateKey returns a LmsPrivateKey, seeded by a cryptographically secure
 // random number generator.
-func NewPrivateKey(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType, id common.ID) (LmsPrivateKey, error) {
+func NewPrivateKey(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType) (LmsPrivateKey, error) {
 	var err error
 	tc, err = tc.LmsType()
 	if err != nil {
@@ -37,6 +37,12 @@ func NewPrivateKey(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType,
 	if err != nil {
 		return LmsPrivateKey{}, err
 	}
+	idbytes := make([]byte, common.ID_LEN)
+	_, err = rand.Read(idbytes)
+	if err != nil {
+		return LmsPrivateKey{}, err
+	}
+	id := common.ID(idbytes)
 
 	return NewPrivateKeyFromSeed(tc, otstc, id, seed)
 }

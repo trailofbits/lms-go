@@ -9,4 +9,5 @@ jobs:
     steps:
       - uses: jidicula/go-fuzz-action@v1.1.0
         with:
+          packages: './lms/...'
           fuzz-time: 30s

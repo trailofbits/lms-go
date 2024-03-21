@@ -44,7 +44,7 @@ func NewLmsSignature(tc common.LmsAlgorithmType, q uint32, otsig ots.LmsOtsSigna
 func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	var err error
 
-	// The internal coutnter is bytes 0-3
+	// The internal counter is bytes 0-3
 	q := binary.BigEndian.Uint32(b[0:4])
 
 	// The OTS signature starts at byte 4, with the typecode first

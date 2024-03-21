@@ -106,7 +106,7 @@ func (pub *LmsOtsPublicKey) Key() []byte {
 
 // LmsOtsPublicKeyFromBytes returns an LmsOtsPublicKey that represents b.
 // This is the inverse of the ToBytes() method on the LmsOtsPublicKey object.
-func LmsOtsPublicKeyFromByes(b []byte) (LmsOtsPublicKey, error) {
+func LmsOtsPublicKeyFromBytes(b []byte) (LmsOtsPublicKey, error) {
 	// The typecode is bytes 0-3 (4 bytes)
 	typecode, err := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[0:4])).LmsOtsType()
 	if err != nil {
@@ -117,9 +117,9 @@ func LmsOtsPublicKeyFromByes(b []byte) (LmsOtsPublicKey, error) {
 
 	// ensure that the length of the slice is correct
 	if uint64(len(b)) < 4+common.ID_LEN+4+params.N {
-		return LmsOtsPublicKey{}, errors.New("LmsOtsPublicKeyFromByes(): OTS public key too short")
+		return LmsOtsPublicKey{}, errors.New("LmsOtsPublicKeyFromBytes(): OTS public key too short")
 	} else if uint64(len(b)) > 4+common.ID_LEN+4+params.N {
-		return LmsOtsPublicKey{}, errors.New("LmsOtsPublicKeyFromByes(): OTS public key too long")
+		return LmsOtsPublicKey{}, errors.New("LmsOtsPublicKeyFromBytes(): OTS public key too long")
 	} else {
 		// The next ID_LEN bytes are the id
 		id := common.ID(b[4 : 4+common.ID_LEN])

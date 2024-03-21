@@ -16,7 +16,7 @@ import (
 func NewPublicKey(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType, id common.ID, k []byte) (LmsPublicKey, error) {
 	// Explicit check from Algorithm 6, Step 1 of RFC 8554
 	if len(k) < 8 {
-		return LmsPublicKey{}, errors.New("invalid public key")
+		return LmsPublicKey{}, errors.New("NewPublicKey(): invalid public key")
 	}
 
 	var err error

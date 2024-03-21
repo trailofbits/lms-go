@@ -117,9 +117,9 @@ func LmsOtsPublicKeyFromByes(b []byte) (LmsOtsPublicKey, error) {
 
 	// ensure that the length of the slice is correct
 	if uint64(len(b)) < 4+common.ID_LEN+4+params.N {
-		return LmsOtsPublicKey{}, errors.New("OTS public key too short")
+		return LmsOtsPublicKey{}, errors.New("LmsOtsPublicKeyFromByes(): OTS public key too short")
 	} else if uint64(len(b)) > 4+common.ID_LEN+4+params.N {
-		return LmsOtsPublicKey{}, errors.New("OTS public key too long")
+		return LmsOtsPublicKey{}, errors.New("LmsOtsPublicKeyFromByes(): OTS public key too long")
 	} else {
 		// The next ID_LEN bytes are the id
 		id := common.ID(b[4 : 4+common.ID_LEN])

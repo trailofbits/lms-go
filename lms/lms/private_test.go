@@ -28,7 +28,7 @@ func TestPKTreeKAT1(t *testing.T) {
 	otstc := common.LMOTS_SHA256_N32_W4
 
 	lms_priv, err := lms.NewPrivateKeyFromSeed(tc, otstc, common.ID(id), seed)
-  assert.NoError(t, err)
+	assert.NoError(t, err)
 	lms_pub := lms_priv.Public()
 
 	assert.Equal(t, lms_pub.ID(), common.ID(id))
@@ -97,7 +97,7 @@ func TestSignKAT1(t *testing.T) {
 
 	// Generate a signature
 	sig, err := lms_priv.Sign(msg, nil)
-  assert.NoError(t, err)
+	assert.NoError(t, err)
 
 	// Assert incremented
 	assert.Equal(t, lms_priv.Q(), uint32(6))

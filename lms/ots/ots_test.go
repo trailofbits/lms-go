@@ -108,3 +108,11 @@ func TestDoubleSign(t *testing.T) {
 	_, err = ots_priv.Sign([]byte("example2"), nil)
 	assert.Error(t, err)
 }
+
+func TestOtsPublicKeyFromBytes(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		bytes := make([]byte, i)
+		_, err := ots.LmsOtsPublicKeyFromByes(bytes)
+		assert.Error(t, err)
+	}
+}

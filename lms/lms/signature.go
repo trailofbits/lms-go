@@ -42,7 +42,11 @@ func NewLmsSignature(tc common.LmsAlgorithmType, q uint32, otsig ots.LmsOtsSigna
 // LmsSignatureFromBytes returns an LmsSignature represented by b.
 // This is the inverse of the ToBytes() on LmsSignature.
 func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
-  var err error
+	if len(b) < 8 {
+		return LmsSignature{}, errors.New("LmsSignatureFromBytes(): Signature is too short")
+	}
+
+	var err error
 
 	// The internal coutnter is bytes 0-3
 	q := binary.BigEndian.Uint32(b[0:4])
@@ -51,9 +55,9 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	otstc := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[4:8]))
 	// Return error if not a valid LM-OTS algorithm:
 	_, err = otstc.LmsOtsType()
-  if err != nil {
-    return LmsSignature{}, err
-  }
+	if err != nil {
+		return LmsSignature{}, err
+	}
 
 	// 4 + LM-OTS signature length is the first byte after the LM-OTS sig
 	otsigmax := 4 + otstc.LmsOtsSigLength()
@@ -65,9 +69,9 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	typecode := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[otsigmax : otsigmax+4]))
 	// Return error if not a valid LMS algorithm
 	_, err = typecode.LmsType()
-  if err != nil {
-    return LmsSignature{}, err
-  }
+	if err != nil {
+		return LmsSignature{}, err
+	}
 
 	// With both typecodes, we can calculate the total signature length
 	var siglen = typecode.LmsSigLength(otstc)

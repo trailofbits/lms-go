@@ -32,7 +32,10 @@ func (sig *LmsOtsSignature) RecoverPublicKey(msg []byte, id common.ID, q uint32)
 	var be16 [2]byte
 	var be32 [4]byte
 	var tmp []byte
-	params := sig.typecode.Params()
+	params, err := sig.typecode.Params()
+	if err != nil {
+		return LmsOtsPublicKey{}, false
+	}
 	hasher := params.H.New()
 	hash_len := hasher.Size()
 
@@ -60,7 +63,10 @@ func (sig *LmsOtsSignature) RecoverPublicKey(msg []byte, id common.ID, q uint32)
 	hash_write(hasher, msg)
 
 	Q := hasher.Sum(nil)
-	expanded := common.Expand(Q, sig.typecode)
+	expanded, err := common.Expand(Q, sig.typecode)
+	if err != nil {
+		return LmsOtsPublicKey{}, false
+	}
 
 	hasher.Reset()
 	hash_write(hasher, id[:])
@@ -116,7 +122,10 @@ func LmsOtsPublicKeyFromBytes(b []byte) (LmsOtsPublicKey, error) {
 		return LmsOtsPublicKey{}, err
 	}
 	// ensure that it is valid
-	params := typecode.Params()
+	params, err := typecode.Params()
+	if err != nil {
+		return LmsOtsPublicKey{}, err
+	}
 
 	// ensure that the length of the slice is correct
 	if uint64(len(b)) < 4+common.ID_LEN+4+params.N {

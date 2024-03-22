@@ -40,8 +40,14 @@ func NewPublicKey(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType, 
 // Verify returns true if sig is valid for msg and this public key.
 // It returns false otherwise.
 func (pub *LmsPublicKey) Verify(msg []byte, sig LmsSignature) bool {
-	params := pub.typecode.LmsParams()
-	ots_params := pub.otstype.Params()
+	params, err := pub.typecode.LmsParams()
+	if err != nil {
+		return false
+	}
+	ots_params, err := pub.otstype.Params()
+	if err != nil {
+		return false
+	}
 	height := int(params.H)
 	leaves := uint32(1 << height)
 
@@ -136,7 +142,10 @@ func LmsPublicKeyFromBytes(b []byte) (LmsPublicKey, error) {
 		return LmsPublicKey{}, err
 	}
 	// Ensure b is the correct length
-	lmsparams := typecode.LmsParams()
+	lmsparams, err := typecode.LmsParams()
+	if err != nil {
+		return LmsPublicKey{}, err
+	}
 	if uint64(len(b)) != lmsparams.M+24 {
 		return LmsPublicKey{}, errors.New("LmsPublicKeyFromBytes(): invalid key length")
 	}

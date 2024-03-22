@@ -30,7 +30,10 @@ func NewPrivateKey(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType)
 	if err != nil {
 		return LmsPrivateKey{}, err
 	}
-	params := tc.LmsParams()
+	params, err := tc.LmsParams()
+	if err != nil {
+		return LmsPrivateKey{}, err
+	}
 
 	seed := make([]byte, params.M)
 	_, err = rand.Read(seed)
@@ -58,13 +61,17 @@ func NewPrivateKeyFromSeed(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgori
 	if err != nil {
 		return LmsPrivateKey{}, err
 	}
+	tree, err := GeneratePKTree(tc, otstc, id, seed)
+	if err != nil {
+		return LmsPrivateKey{}, err
+	}
 	return LmsPrivateKey{
 		typecode: tc,
 		otstype:  otstc,
 		q:        0,
 		id:       id,
 		seed:     seed,
-		authtree: GeneratePKTree(tc, otstc, id, seed),
+		authtree: tree,
 	}, nil
 }
 
@@ -84,14 +91,20 @@ func (priv *LmsPrivateKey) Sign(msg []byte, rng io.Reader) (LmsSignature, error)
 	if rng == nil {
 		rng = rand.Reader
 	}
-	params := priv.typecode.LmsParams()
+	params, err := priv.typecode.LmsParams()
+	if err != nil {
+		return LmsSignature{}, err
+	}
 	height := int(params.H)
 	var leaves uint32 = 1 << height
 	if priv.q >= leaves {
 		return LmsSignature{}, errors.New("Sign(): invalid private key")
 	}
 	// ots_params := ots_tc.Params()
-	ots_priv := ots.NewPrivateKeyFromSeed(priv.otstype, priv.q, priv.id, priv.seed)
+	ots_priv, err := ots.NewPrivateKeyFromSeed(priv.otstype, priv.q, priv.id, priv.seed)
+	if err != nil {
+		return LmsSignature{}, err
+	}
 	ots_sig, err := ots_priv.Sign(msg, rng)
 	if err != nil {
 		return LmsSignature{}, err
@@ -177,7 +190,10 @@ func LmsPrivateKeyFromBytes(b []byte) (LmsPrivateKey, error) {
 	if err != nil {
 		return LmsPrivateKey{}, err
 	}
-	lmsparams := typecode.LmsParams()
+	lmsparams, err := typecode.LmsParams()
+	if err != nil {
+		return LmsPrivateKey{}, err
+	}
 	if len(b) < int(lmsparams.M+28) {
 		return LmsPrivateKey{}, errors.New("LmsPrivateKeyFromBytes(): Input is too short")
 	}
@@ -201,9 +217,15 @@ func LmsPrivateKeyFromBytes(b []byte) (LmsPrivateKey, error) {
 
 // GeneratePKTree generates the Merkle Tree needed to derive the public key and
 // authentication path for any message.
-func GeneratePKTree(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType, id common.ID, seed []byte) [][]byte {
-	params := tc.LmsParams()
-	ots_params := otstc.Params()
+func GeneratePKTree(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType, id common.ID, seed []byte) ([][]byte, error) {
+	params, err := tc.LmsParams()
+	if err != nil {
+		return nil, err
+	}
+	ots_params, err := otstc.Params()
+	if err != nil {
+		return nil, err
+	}
 
 	var tree_nodes uint32 = (1 << (params.H + 1)) - 1
 	var leaves uint32 = 1 << params.H
@@ -215,8 +237,14 @@ func GeneratePKTree(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType
 	var r_be [4]byte
 	for i = 0; i < leaves; i++ {
 		r = i + leaves
-		ots_priv := ots.NewPrivateKeyFromSeed(otstc, i, id, seed)
-		ots_pub := ots_priv.Public()
+		ots_priv, err := ots.NewPrivateKeyFromSeed(otstc, i, id, seed)
+		if err != nil {
+			return nil, err
+		}
+		ots_pub, err := ots_priv.Public()
+		if err != nil {
+			return nil, err
+		}
 
 		binary.BigEndian.PutUint32(r_be[:], r)
 
@@ -243,5 +271,5 @@ func GeneratePKTree(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType
 			authtree[r-1] = hasher.Sum(nil)
 		}
 	}
-	return authtree
+	return authtree, nil
 }

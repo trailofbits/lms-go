@@ -135,16 +135,16 @@ func LmsPublicKeyFromBytes(b []byte) (LmsPublicKey, error) {
 	if err != nil {
 		return LmsPublicKey{}, err
 	}
+	// Ensure b is the correct length
+	lmsparams := typecode.LmsParams()
+	if uint64(len(b)) != lmsparams.M+24 {
+		return LmsPublicKey{}, errors.New("LmsPublicKeyFromBytes(): invalid key length")
+	}
+
 	// The ID is bytes 8-23 (16 bytes)
 	id := common.ID(b[8:24])
 	// The public key, k, is the remaining bytes
 	k := b[24:]
-
-	// Ensure k is the correct length
-	lmsparams := typecode.LmsParams()
-	if uint64(len(k)) != lmsparams.M {
-		return LmsPublicKey{}, errors.New("LmsPublicKeyFromBytes(): invalid key length")
-	}
 
 	return LmsPublicKey{
 		typecode: typecode,

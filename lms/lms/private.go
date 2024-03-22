@@ -163,6 +163,10 @@ func (priv *LmsPrivateKey) Q() uint32 {
 // LmsPrivateKeyFromBytes returns an LmsPrivateKey that represents b.
 // This is the inverse of the ToBytes() method on the LmsPrivateKey object.
 func LmsPrivateKeyFromBytes(b []byte) (LmsPrivateKey, error) {
+	if len(b) < 8 {
+		return LmsPrivateKey{}, errors.New("LmsPrivateKeyFromBytes(): Input is too short")
+	}
+
 	// The typecode is bytes 0-3 (4 bytes)
 	typecode, err := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[0:4])).LmsType()
 	if err != nil {

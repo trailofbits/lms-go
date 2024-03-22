@@ -42,6 +42,10 @@ func NewLmsSignature(tc common.LmsAlgorithmType, q uint32, otsig ots.LmsOtsSigna
 // LmsSignatureFromBytes returns an LmsSignature represented by b.
 // This is the inverse of the ToBytes() on LmsSignature.
 func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
+	if len(b) < 8 {
+		return LmsSignature{}, errors.New("LmsSignatureFromBytes(): Signature is too short")
+	}
+
 	var err error
 
 	// The internal counter is bytes 0-3

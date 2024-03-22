@@ -138,3 +138,11 @@ func TestSignKAT1(t *testing.T) {
 	result = lms_public.Verify(msg, sig2)
 	assert.False(t, result)
 }
+
+func TestShortSignatureFromBytes(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		data := make([]byte, i)
+		_, err := lms.LmsSignatureFromBytes(data)
+		assert.Error(t, err)
+	}
+}

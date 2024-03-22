@@ -22,7 +22,10 @@ func testOtsSignVerify(t *testing.T, otstc common.LmsOtsAlgorithmType) {
 		panic(err)
 	}
 
-	ots_pub := ots_priv.Public()
+	ots_pub, err := ots_priv.Public()
+	if err != nil {
+		panic(err)
+	}
 	ots_sig, err := ots_priv.Sign([]byte("example"), nil)
 	if err != nil {
 		panic(err)
@@ -45,7 +48,10 @@ func testOtsSignVerifyFail(t *testing.T, otstc common.LmsOtsAlgorithmType) {
 		panic(err)
 	}
 
-	ots_pub := ots_priv.Public()
+	ots_pub, err := ots_priv.Public()
+	if err != nil {
+		panic(err)
+	}
 	ots_sig, err := ots_priv.Sign([]byte("example"), nil)
 	if err != nil {
 		panic(err)

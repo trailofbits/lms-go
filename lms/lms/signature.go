@@ -18,7 +18,10 @@ func NewLmsSignature(tc common.LmsAlgorithmType, q uint32, otsig ots.LmsOtsSigna
 	if err != nil {
 		return LmsSignature{}, err
 	}
-	params := tc.LmsParams()
+	params, err := tc.LmsParams()
+	if err != nil {
+		return LmsSignature{}, err
+	}
 	var tmp uint32 = 1 << params.H
 
 	// From step 2i of Algorithm 6a in RFC 8554
@@ -45,7 +48,7 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	var err error
 
 	if len(b) < 8 {
-		return LmsSignature{}, errors.New("LmsSignatureFromBytes(): input is too short")
+		return LmsSignature{}, errors.New("input is too short")
 	}
 	// The internal coutnter is bytes 0-3
 	q := binary.BigEndian.Uint32(b[0:4])
@@ -59,7 +62,11 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	}
 
 	// 4 + LM-OTS signature length is the first byte after the LM-OTS sig
-	otsigmax := 4 + otstc.LmsOtsSigLength()
+	otssiglen, err := otstc.LmsOtsSigLength()
+	if err != nil {
+		return LmsSignature{}, err
+	}
+	otsigmax := 4 + otssiglen
 	if uint64(4+len(b)) <= otsigmax {
 		// We are only ensuring that we can read the LMS typecode
 		return LmsSignature{}, errors.New("signature is too short for LM-OTS typecode")
@@ -73,9 +80,12 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	}
 
 	// With both typecodes, we can calculate the total signature length
-	var siglen = typecode.LmsSigLength(otstc)
+	siglen, err := typecode.LmsSigLength(otstc)
+	if err != nil {
+		return LmsSignature{}, err
+	}
 	if siglen != uint64(len(b)) {
-		return LmsSignature{}, errors.New("LmsSignatureFromBytes(): Invalid LMS signature length")
+		return LmsSignature{}, errors.New("invalid LMS signature length")
 	}
 
 	// currenly undefined func
@@ -85,14 +95,17 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	}
 
 	// With the lengths and OTS sig in hand, we can now parse the LMS sig
-	lmsparams := typecode.LmsParams()
+	lmsparams, err := typecode.LmsParams()
+	if err != nil {
+		return LmsSignature{}, err
+	}
 	var height = lmsparams.H
 	m := lmsparams.M
 	var start = otsigmax + 4
 
 	// Explicitly check that q < 2^H
 	if q >= (1 << height) {
-		return LmsSignature{}, errors.New("LmsSignatureFromBytes(): Internal counter is too high")
+		return LmsSignature{}, errors.New("internal counter is too high")
 	}
 
 	// Read the authentication path
@@ -120,7 +133,10 @@ func (sig *LmsSignature) ToBytes() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	params := typecode.LmsParams()
+	params, err := typecode.LmsParams()
+	if err != nil {
+		return nil, err
+	}
 
 	// First 4 bytes: q
 	binary.BigEndian.PutUint32(u32_be[:], sig.q)

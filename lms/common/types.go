@@ -63,13 +63,13 @@ const (
 // LmsAlgorithmType represents a specific instance of LMS
 type LmsAlgorithmType interface {
 	LmsType() (lms_type_code, error)
-	LmsParams() LmsParam
+	LmsParams() (LmsParam, error)
 }
 
 // LmsOtsAlgorithmType represents a specific instance of LM-OTS
 type LmsOtsAlgorithmType interface {
 	LmsOtsType() (lms_type_code, error)
-	Params() LmsOtsParam
+	Params() (LmsOtsParam, error)
 }
 
 // Hasher represents a streaming hash function
@@ -114,17 +114,24 @@ func (x lms_type_code) LmsType() (lms_type_code, error) {
 	if x >= LMS_SHA256_M32_H5 && x <= LMS_SHA256_M32_H25 {
 		return x, nil
 	} else {
-		return x, errors.New("LmsType: invalid type code")
+		return x, errors.New("invalid type code")
 	}
 }
 
 // Returns the expected signature length for an LMS type, given an associated LM-OTS type
-func (x lms_type_code) LmsSigLength(otstc lms_type_code) uint64 {
+func (x lms_type_code) LmsSigLength(otstc lms_type_code) (uint64, error) {
 	if x >= LMS_SHA256_M32_H5 && x <= LMS_SHA256_M32_H25 {
-		params := x.LmsParams()
-		return uint64(4 + 4 + otstc.LmsOtsSigLength() + (params.H * params.M))
+		params, err := x.LmsParams()
+		if err != nil {
+			return 0, err
+		}
+		siglen, err := otstc.LmsOtsSigLength()
+		if err != nil {
+			return 0, err
+		}
+		return uint64(4 + 4 + siglen + (params.H * params.M)), nil
 	} else {
-		panic("LmsSigLength: invalid type code")
+		return 0, errors.New("invalid type code")
 	}
 }
 
@@ -133,59 +140,63 @@ func (x lms_type_code) LmsOtsType() (lms_type_code, error) {
 	if x >= LMOTS_SHA256_N32_W1 && x <= LMOTS_SHA256_N32_W8 {
 		return x, nil
 	} else {
-		return x, errors.New("LmsOtsType: invalid type code")
+		return x, errors.New("invalid type code")
 	}
 }
 
 // Returns the expected byte length of a given LM-OTS signature algorithm
-func (x lms_type_code) LmsOtsSigLength() uint64 {
+func (x lms_type_code) LmsOtsSigLength() (uint64, error) {
 	if x >= LMOTS_SHA256_N32_W1 && x <= LMOTS_SHA256_N32_W8 {
-		return x.Params().SIG_LEN
+		params, err := x.Params()
+		if err != nil {
+			return 0, err
+		}
+		return params.SIG_LEN, nil
 	} else {
-		panic("LmsOtsSigLength: invalid type code")
+		return 0, errors.New("invalid type code")
 	}
 }
 
 // Returns a LmsParam corresponding to the lms_type_code, x
-func (x lms_type_code) LmsParams() LmsParam {
+func (x lms_type_code) LmsParams() (LmsParam, error) {
 	switch x {
 	case LMS_SHA256_M32_H5:
 		return LmsParam{
 			Hash: Sha256Hasher{},
 			M:    32,
 			H:    5,
-		}
+		}, nil
 	case LMS_SHA256_M32_H10:
 		return LmsParam{
 			Hash: Sha256Hasher{},
 			M:    32,
 			H:    10,
-		}
+		}, nil
 	case LMS_SHA256_M32_H15:
 		return LmsParam{
 			Hash: Sha256Hasher{},
 			M:    32,
 			H:    15,
-		}
+		}, nil
 	case LMS_SHA256_M32_H20:
 		return LmsParam{
 			Hash: Sha256Hasher{},
 			M:    32,
 			H:    20,
-		}
+		}, nil
 	case LMS_SHA256_M32_H25:
 		return LmsParam{
 			Hash: Sha256Hasher{},
 			M:    32,
 			H:    25,
-		}
+		}, nil
 	default:
-		panic("LmsParams: invalid type code")
+		return LmsParam{}, errors.New("invalid LMS type code")
 	}
 }
 
 // Returns a LmsOtsParam corresponding to the lms_type_code, x
-func (x lms_type_code) Params() LmsOtsParam {
+func (x lms_type_code) Params() (LmsOtsParam, error) {
 	switch x {
 	case LMOTS_SHA256_N32_W1:
 		return LmsOtsParam{
@@ -195,7 +206,7 @@ func (x lms_type_code) Params() LmsOtsParam {
 			P:       265,
 			LS:      7,
 			SIG_LEN: 8516,
-		}
+		}, nil
 	case LMOTS_SHA256_N32_W2:
 		return LmsOtsParam{
 			H:       Sha256Hasher{},
@@ -204,7 +215,7 @@ func (x lms_type_code) Params() LmsOtsParam {
 			P:       133,
 			LS:      6,
 			SIG_LEN: 4292,
-		}
+		}, nil
 	case LMOTS_SHA256_N32_W4:
 		return LmsOtsParam{
 			H:       Sha256Hasher{},
@@ -213,7 +224,7 @@ func (x lms_type_code) Params() LmsOtsParam {
 			P:       67,
 			LS:      4,
 			SIG_LEN: 2180,
-		}
+		}, nil
 	case LMOTS_SHA256_N32_W8:
 		return LmsOtsParam{
 			H:       Sha256Hasher{},
@@ -222,8 +233,8 @@ func (x lms_type_code) Params() LmsOtsParam {
 			P:       34,
 			LS:      0,
 			SIG_LEN: 1124,
-		}
+		}, nil
 	default:
-		panic("Params: invalid type code")
+		return LmsOtsParam{}, errors.New("invalid LM-OTS type code")
 	}
 }

@@ -40,8 +40,14 @@ func NewPublicKey(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType, 
 // Verify returns true if sig is valid for msg and this public key.
 // It returns false otherwise.
 func (pub *LmsPublicKey) Verify(msg []byte, sig LmsSignature) bool {
-	params := pub.typecode.LmsParams()
-	ots_params := pub.otstype.Params()
+	params, err := pub.typecode.LmsParams()
+	if err != nil {
+		return false
+	}
+	ots_params, err := pub.otstype.Params()
+	if err != nil {
+		return false
+	}
 	height := int(params.H)
 	leaves := uint32(1 << height)
 
@@ -123,7 +129,7 @@ func (pub *LmsPublicKey) ID() common.ID {
 // This is the inverse of the ToBytes() method on the LmsPublicKey object.
 func LmsPublicKeyFromByes(b []byte) (LmsPublicKey, error) {
 	if len(b) < 8 {
-		return LmsPublicKey{}, errors.New("LmsPublicKeyFromBytes(): key must be more than 8 bytes long")
+		return LmsPublicKey{}, errors.New("key must be more than 8 bytes long")
 	}
 	// The typecode is bytes 0-3 (4 bytes)
 	typecode, err := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[0:4])).LmsType()
@@ -136,7 +142,7 @@ func LmsPublicKeyFromByes(b []byte) (LmsPublicKey, error) {
 		return LmsPublicKey{}, err
 	}
 	if len(b) < 24 {
-		return LmsPublicKey{}, errors.New("LmsPublicKeyFromBytes(): input is too short")
+		return LmsPublicKey{}, errors.New("input is too short")
 	}
 	// The ID is bytes 8-23 (16 bytes)
 	id := common.ID(b[8:24])
@@ -144,9 +150,12 @@ func LmsPublicKeyFromByes(b []byte) (LmsPublicKey, error) {
 	k := b[24:]
 
 	// Ensure k is the correct length
-	lmsparams := typecode.LmsParams()
+	lmsparams, err := typecode.LmsParams()
+	if err != nil {
+		return LmsPublicKey{}, err
+	}
 	if uint64(len(k)) != lmsparams.M {
-		return LmsPublicKey{}, errors.New("LmsPublicKeyFromBytes(): invalid key length")
+		return LmsPublicKey{}, errors.New("invalid key length")
 	}
 
 	return LmsPublicKey{

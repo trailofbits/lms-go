@@ -32,7 +32,7 @@ func TestVerify(t *testing.T) {
 		panic(err)
 	}
 
-	publickey, err := lms.LmsPublicKeyFromByes(pubkeybytes)
+	publickey, err := lms.LmsPublicKeyFromBytes(pubkeybytes)
 	if err != nil {
 		panic(err)
 	}
@@ -60,7 +60,7 @@ func TestShortPublicKeyReturnsError(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	_, err = lms.LmsPublicKeyFromByes(pub_bytes)
+	_, err = lms.LmsPublicKeyFromBytes(pub_bytes)
 	assert.NotNil(t, err)
 }
 
@@ -75,13 +75,13 @@ func TestEncode(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	pubkey, err := lms.LmsPublicKeyFromByes(pubkeybytes)
+	pubkey, err := lms.LmsPublicKeyFromBytes(pubkeybytes)
 	assert.Nil(t, err)
 
 	bytes2 := pubkey.ToBytes()
 	assert.Equal(t, pubkeybytes, bytes2)
 	bytes2[0] = 0xff
-	_, err = lms.LmsPublicKeyFromByes(bytes2)
+	_, err = lms.LmsPublicKeyFromBytes(bytes2)
 	assert.NotNil(t, err)
 }
 
@@ -611,7 +611,7 @@ func TestRfc8554KAT2(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	pk, err := lms.LmsPublicKeyFromByes(lms_public_key_bytes)
+	pk, err := lms.LmsPublicKeyFromBytes(lms_public_key_bytes)
 	if err != nil {
 		panic(err)
 	}

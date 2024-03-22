@@ -117,7 +117,7 @@ func (x *LmsOtsPrivateKey) Sign(msg []byte, rng io.Reader) (LmsOtsSignature, err
 		rng = rand.Reader
 	}
 	if !x.valid {
-		return LmsOtsSignature{}, errors.New("invalid private key")
+		return LmsOtsSignature{}, errors.New("Sign(): invalid private key")
 	}
 
 	var err error

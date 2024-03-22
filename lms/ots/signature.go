@@ -13,7 +13,7 @@ import (
 // LmsOtsSignatureFromBytes returns an LmsOtsSignature represented by b.
 func LmsOtsSignatureFromBytes(b []byte) (LmsOtsSignature, error) {
 	if len(b) < 4 {
-		return LmsOtsSignature{}, errors.New("No typecode")
+		return LmsOtsSignature{}, errors.New("LmsOtsSignatureFromBytes(): No typecode")
 	}
 
 	// Typecode is the first 4 bytes
@@ -23,9 +23,9 @@ func LmsOtsSignatureFromBytes(b []byte) (LmsOtsSignature, error) {
 
 	// check the length of the signature
 	if uint64(len(b)) < params.SIG_LEN {
-		return LmsOtsSignature{}, errors.New("LMOTS signature too short")
+		return LmsOtsSignature{}, errors.New("LmsOtsSignatureFromBytes(): LMOTS signature too short")
 	} else if uint64(len(b)) > params.SIG_LEN {
-		return LmsOtsSignature{}, errors.New("LMOTS signature too long")
+		return LmsOtsSignature{}, errors.New("LmsOtsSignatureFromBytes(): LMOTS signature too long")
 	} else {
 		// parse the signature
 		c := b[4 : 4+int(params.N)]

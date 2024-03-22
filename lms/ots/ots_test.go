@@ -22,7 +22,10 @@ func testOtsSignVerify(t *testing.T, otstc common.LmsOtsAlgorithmType) {
 		panic(err)
 	}
 
-	ots_pub := ots_priv.Public()
+	ots_pub, err := ots_priv.Public()
+	if err != nil {
+		panic(err)
+	}
 	ots_sig, err := ots_priv.Sign([]byte("example"), nil)
 	if err != nil {
 		panic(err)
@@ -45,7 +48,10 @@ func testOtsSignVerifyFail(t *testing.T, otstc common.LmsOtsAlgorithmType) {
 		panic(err)
 	}
 
-	ots_pub := ots_priv.Public()
+	ots_pub, err := ots_priv.Public()
+	if err != nil {
+		panic(err)
+	}
 	ots_sig, err := ots_priv.Sign([]byte("example"), nil)
 	if err != nil {
 		panic(err)
@@ -112,7 +118,7 @@ func TestDoubleSign(t *testing.T) {
 func TestOtsPublicKeyFromBytes(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		bytes := make([]byte, i)
-		_, err := ots.LmsOtsPublicKeyFromByes(bytes)
+		_, err := ots.LmsOtsPublicKeyFromBytes(bytes)
 		assert.Error(t, err)
 	}
 }

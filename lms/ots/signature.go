@@ -19,7 +19,10 @@ func LmsOtsSignatureFromBytes(b []byte) (LmsOtsSignature, error) {
 	// Typecode is the first 4 bytes
 	typecode := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[0:4]))
 	// Panic if not a valid LM-OTS algorithm:
-	params := typecode.Params()
+	params, err := typecode.Params()
+	if err != nil {
+		return LmsOtsSignature{}, err
+	}
 
 	// check the length of the signature
 	if uint64(len(b)) < params.SIG_LEN {
@@ -49,7 +52,10 @@ func LmsOtsSignatureFromBytes(b []byte) (LmsOtsSignature, error) {
 func (sig *LmsOtsSignature) ToBytes() ([]byte, error) {
 	var serialized []byte
 	var u32_be [4]byte
-	params := sig.typecode.Params()
+	params, err := sig.typecode.Params()
+	if err != nil {
+		return nil, err
+	}
 
 	// First 4 bytes: LMOTS typecode
 	typecode, err := sig.typecode.LmsOtsType()

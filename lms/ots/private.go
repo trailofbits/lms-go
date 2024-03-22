@@ -23,8 +23,10 @@ func hash_write(h hash.Hash, x []byte) {
 // NewPrivateKey returns a LmsOtsPrivateKey, seeded by a cryptographically secure
 // random number generator.
 func NewPrivateKey(tc common.LmsOtsAlgorithmType, q uint32, id common.ID) (LmsOtsPrivateKey, error) {
-	var err error
-	params := tc.Params()
+	params, err := tc.Params()
+	if err != nil {
+		return LmsOtsPrivateKey{}, err
+	}
 
 	seed := make([]byte, params.N)
 	_, err = rand.Read(seed)
@@ -32,13 +34,16 @@ func NewPrivateKey(tc common.LmsOtsAlgorithmType, q uint32, id common.ID) (LmsOt
 		return LmsOtsPrivateKey{}, err
 	}
 
-	return NewPrivateKeyFromSeed(tc, q, id, seed), nil
+	return NewPrivateKeyFromSeed(tc, q, id, seed)
 }
 
 // NewPrivateKeyFromSeed returns a new LmsOtsPrivateKey, using the algorithm from
 // Appendix A of <https://datatracker.ietf.org/doc/html/rfc8554#appendix-A>
-func NewPrivateKeyFromSeed(tc common.LmsOtsAlgorithmType, q uint32, id common.ID, seed []byte) LmsOtsPrivateKey {
-	params := tc.Params()
+func NewPrivateKeyFromSeed(tc common.LmsOtsAlgorithmType, q uint32, id common.ID, seed []byte) (LmsOtsPrivateKey, error) {
+	params, err := tc.Params()
+	if err != nil {
+		return LmsOtsPrivateKey{}, err
+	}
 	x := make([][]byte, params.P)
 
 	for i := uint64(0); i < params.P; i++ {
@@ -64,15 +69,18 @@ func NewPrivateKeyFromSeed(tc common.LmsOtsAlgorithmType, q uint32, id common.ID
 		id:       id,
 		x:        x,
 		valid:    true,
-	}
+	}, nil
 }
 
 // Public returns an LmsOtsPublicKey that validates signatures for this private key.
-func (x *LmsOtsPrivateKey) Public() LmsOtsPublicKey {
+func (x *LmsOtsPrivateKey) Public() (LmsOtsPublicKey, error) {
 	var be16 [2]byte
 	var be32 [4]byte
 	var tmp []byte
-	params := x.typecode.Params()
+	params, err := x.typecode.Params()
+	if err != nil {
+		return LmsOtsPublicKey{}, err
+	}
 	hasher := params.H.New()
 	binary.BigEndian.PutUint32(be32[:], x.q)
 
@@ -107,7 +115,7 @@ func (x *LmsOtsPrivateKey) Public() LmsOtsPublicKey {
 		q:        x.q,
 		id:       x.id,
 		k:        hasher.Sum(nil),
-	}
+	}, nil
 }
 
 // Sign calculates the LM-OTS signature of a chosen message.
@@ -123,7 +131,10 @@ func (x *LmsOtsPrivateKey) Sign(msg []byte, rng io.Reader) (LmsOtsSignature, err
 	var err error
 	var be16 [2]byte
 	var be32 [4]byte
-	params := x.typecode.Params()
+	params, err := x.typecode.Params()
+	if err != nil {
+		return LmsOtsSignature{}, err
+	}
 	hasher := params.H.New()
 	c := make([]byte, params.N)
 
@@ -141,7 +152,10 @@ func (x *LmsOtsPrivateKey) Sign(msg []byte, rng io.Reader) (LmsOtsSignature, err
 	hash_write(hasher, msg)
 
 	q := hasher.Sum(nil)
-	expanded := common.Expand(q, x.typecode)
+	expanded, err := common.Expand(q, x.typecode)
+	if err != nil {
+		return LmsOtsSignature{}, err
+	}
 
 	y := make([][]byte, params.P)
 

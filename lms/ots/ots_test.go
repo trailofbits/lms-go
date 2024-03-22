@@ -112,7 +112,7 @@ func TestDoubleSign(t *testing.T) {
 func TestOtsPublicKeyFromBytes(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		bytes := make([]byte, i)
-		_, err := ots.LmsOtsPublicKeyFromByes(bytes)
+		_, err := ots.LmsOtsPublicKeyFromBytes(bytes)
 		assert.Error(t, err)
 	}
 }

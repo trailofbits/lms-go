@@ -114,7 +114,7 @@ func (x lms_type_code) LmsType() (lms_type_code, error) {
 	if x >= LMS_SHA256_M32_H5 && x <= LMS_SHA256_M32_H25 {
 		return x, nil
 	} else {
-		return x, errors.New("LmsType: invalid type code")
+		return x, errors.New("LmsType(): invalid type code")
 	}
 }
 
@@ -124,7 +124,7 @@ func (x lms_type_code) LmsSigLength(otstc lms_type_code) uint64 {
 		params := x.LmsParams()
 		return uint64(4 + 4 + otstc.LmsOtsSigLength() + (params.H * params.M))
 	} else {
-		panic("LmsSigLength: invalid type code")
+		panic("LmsSigLength(): invalid type code")
 	}
 }
 
@@ -133,7 +133,7 @@ func (x lms_type_code) LmsOtsType() (lms_type_code, error) {
 	if x >= LMOTS_SHA256_N32_W1 && x <= LMOTS_SHA256_N32_W8 {
 		return x, nil
 	} else {
-		return x, errors.New("LmsOtsType: invalid type code")
+		return x, errors.New("LmsOtsType(): invalid type code")
 	}
 }
 
@@ -142,7 +142,7 @@ func (x lms_type_code) LmsOtsSigLength() uint64 {
 	if x >= LMOTS_SHA256_N32_W1 && x <= LMOTS_SHA256_N32_W8 {
 		return x.Params().SIG_LEN
 	} else {
-		panic("LmsOtsSigLength: invalid type code")
+		panic("LmsOtsSigLength(): invalid type code")
 	}
 }
 
@@ -180,7 +180,7 @@ func (x lms_type_code) LmsParams() LmsParam {
 			H:    25,
 		}
 	default:
-		panic("LmsParams: invalid type code")
+		panic("LmsParams(): invalid type code")
 	}
 }
 
@@ -224,6 +224,6 @@ func (x lms_type_code) Params() LmsOtsParam {
 			SIG_LEN: 1124,
 		}
 	default:
-		panic("Params: invalid type code")
+		panic("Params(): invalid type code")
 	}
 }

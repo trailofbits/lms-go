@@ -88,7 +88,7 @@ func (priv *LmsPrivateKey) Sign(msg []byte, rng io.Reader) (LmsSignature, error)
 	height := int(params.H)
 	var leaves uint32 = 1 << height
 	if priv.q >= leaves {
-		return LmsSignature{}, errors.New("invalid private key")
+		return LmsSignature{}, errors.New("Sign(): invalid private key")
 	}
 	// ots_params := ots_tc.Params()
 	ots_priv := ots.NewPrivateKeyFromSeed(priv.otstype, priv.q, priv.id, priv.seed)

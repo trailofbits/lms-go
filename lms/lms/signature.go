@@ -23,12 +23,12 @@ func NewLmsSignature(tc common.LmsAlgorithmType, q uint32, otsig ots.LmsOtsSigna
 
 	// From step 2i of Algorithm 6a in RFC 8554
 	if q >= tmp {
-		return LmsSignature{}, errors.New("Invalid signature")
+		return LmsSignature{}, errors.New("NewLmsSignature(): Invalid signature")
 	}
 
 	// There should be H elements in the authpath
 	if uint64(len(path)) != params.H {
-		return LmsSignature{}, errors.New("Invalid signature authentication path")
+		return LmsSignature{}, errors.New("NewLmsSignature(): Invalid signature authentication path")
 	}
 
 	return LmsSignature{
@@ -48,7 +48,7 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 
 	var err error
 
-	// The internal coutnter is bytes 0-3
+	// The internal counter is bytes 0-3
 	q := binary.BigEndian.Uint32(b[0:4])
 
 	// The OTS signature starts at byte 4, with the typecode first
@@ -63,7 +63,7 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	otsigmax := 4 + otstc.LmsOtsSigLength()
 	if uint64(4+len(b)) <= otsigmax {
 		// We are only ensuring that we can read the LMS typecode
-		return LmsSignature{}, errors.New("Signature is too short for LM-OTS typecode")
+		return LmsSignature{}, errors.New("LmsSignatureFromBytes(): Signature is too short for LM-OTS typecode")
 	}
 	// Now that we know we have enough bytes for LMS, look at the typecode
 	typecode := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[otsigmax : otsigmax+4]))

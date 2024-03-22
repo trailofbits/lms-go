@@ -135,6 +135,9 @@ func LmsPublicKeyFromByes(b []byte) (LmsPublicKey, error) {
 	if err != nil {
 		return LmsPublicKey{}, err
 	}
+	if len(b) < 24 {
+		return LmsPublicKey{}, errors.New("LmsPublicKeyFromBytes(): input is too short")
+	}
 	// The ID is bytes 8-23 (16 bytes)
 	id := common.ID(b[8:24])
 	// The public key, k, is the remaining bytes

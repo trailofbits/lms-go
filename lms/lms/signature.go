@@ -23,12 +23,12 @@ func NewLmsSignature(tc common.LmsAlgorithmType, q uint32, otsig ots.LmsOtsSigna
 
 	// From step 2i of Algorithm 6a in RFC 8554
 	if q >= tmp {
-		return LmsSignature{}, errors.New("Invalid signature")
+		return LmsSignature{}, errors.New("invalid signature")
 	}
 
 	// There should be H elements in the authpath
 	if uint64(len(path)) != params.H {
-		return LmsSignature{}, errors.New("Invalid signature authentication path")
+		return LmsSignature{}, errors.New("invalid signature authentication path")
 	}
 
 	return LmsSignature{
@@ -42,8 +42,11 @@ func NewLmsSignature(tc common.LmsAlgorithmType, q uint32, otsig ots.LmsOtsSigna
 // LmsSignatureFromBytes returns an LmsSignature represented by b.
 // This is the inverse of the ToBytes() on LmsSignature.
 func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
-  var err error
+	var err error
 
+	if len(b) < 8 {
+		return LmsSignature{}, errors.New("LmsSignatureFromBytes(): input is too short")
+	}
 	// The internal coutnter is bytes 0-3
 	q := binary.BigEndian.Uint32(b[0:4])
 
@@ -51,23 +54,23 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	otstc := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[4:8]))
 	// Return error if not a valid LM-OTS algorithm:
 	_, err = otstc.LmsOtsType()
-  if err != nil {
-    return LmsSignature{}, err
-  }
+	if err != nil {
+		return LmsSignature{}, err
+	}
 
 	// 4 + LM-OTS signature length is the first byte after the LM-OTS sig
 	otsigmax := 4 + otstc.LmsOtsSigLength()
 	if uint64(4+len(b)) <= otsigmax {
 		// We are only ensuring that we can read the LMS typecode
-		return LmsSignature{}, errors.New("Signature is too short for LM-OTS typecode")
+		return LmsSignature{}, errors.New("signature is too short for LM-OTS typecode")
 	}
 	// Now that we know we have enough bytes for LMS, look at the typecode
 	typecode := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[otsigmax : otsigmax+4]))
 	// Return error if not a valid LMS algorithm
 	_, err = typecode.LmsType()
-  if err != nil {
-    return LmsSignature{}, err
-  }
+	if err != nil {
+		return LmsSignature{}, err
+	}
 
 	// With both typecodes, we can calculate the total signature length
 	var siglen = typecode.LmsSigLength(otstc)

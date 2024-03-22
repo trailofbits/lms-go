@@ -112,7 +112,7 @@ func (pub *LmsOtsPublicKey) Key() []byte {
 
 // LmsOtsPublicKeyFromBytes returns an LmsOtsPublicKey that represents b.
 // This is the inverse of the ToBytes() method on the LmsOtsPublicKey object.
-func LmsOtsPublicKeyFromByes(b []byte) (LmsOtsPublicKey, error) {
+func LmsOtsPublicKeyFromBytes(b []byte) (LmsOtsPublicKey, error) {
 	// The typecode is bytes 0-3 (4 bytes)
 	typecode, err := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[0:4])).LmsOtsType()
 	if err != nil {

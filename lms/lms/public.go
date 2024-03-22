@@ -127,7 +127,7 @@ func (pub *LmsPublicKey) ID() common.ID {
 
 // LmsPublicKeyFromBytes returns an LmsPublicKey that represents b.
 // This is the inverse of the ToBytes() method on the LmsPublicKey object.
-func LmsPublicKeyFromByes(b []byte) (LmsPublicKey, error) {
+func LmsPublicKeyFromBytes(b []byte) (LmsPublicKey, error) {
 	if len(b) < 8 {
 		return LmsPublicKey{}, errors.New("key must be more than 8 bytes long")
 	}

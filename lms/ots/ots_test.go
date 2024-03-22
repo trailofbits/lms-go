@@ -60,7 +60,7 @@ func testOtsSignVerifyFail(t *testing.T, otstc common.LmsOtsAlgorithmType) {
 	// modify q so that the verification fails
 	ots_pub_bytes := ots_pub.ToBytes()
 	ots_pub_bytes[23] = 1
-	ots_pub, err = ots.LmsOtsPublicKeyFromByes(ots_pub_bytes)
+	ots_pub, err = ots.LmsOtsPublicKeyFromBytes(ots_pub_bytes)
 	if err != nil {
 		panic(err)
 	}

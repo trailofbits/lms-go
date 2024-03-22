@@ -50,7 +50,7 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	if len(b) < 8 {
 		return LmsSignature{}, errors.New("input is too short")
 	}
-	// The internal coutnter is bytes 0-3
+	// The internal counter is bytes 0-3
 	q := binary.BigEndian.Uint32(b[0:4])
 
 	// The OTS signature starts at byte 4, with the typecode first

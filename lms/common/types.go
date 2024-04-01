@@ -131,7 +131,7 @@ func (x lms_type_code) LmsSigLength(otstc lms_type_code) (uint64, error) {
 		}
 		return uint64(4 + 4 + otssiglen + (params.H * params.M)), nil
 	} else {
-		panic("LmsSigLength(): invalid type code")
+		return 0, errors.New("LmsSigLength(): invalid type code")
 	}
 }
 
@@ -153,7 +153,7 @@ func (x lms_type_code) LmsOtsSigLength() (uint64, error) {
 		}
 		return params.SIG_LEN, nil
 	} else {
-		panic("LmsOtsSigLength(): invalid type code")
+		return 0, errors.New("LmsOtsSigLength(): invalid type code")
 	}
 }
 

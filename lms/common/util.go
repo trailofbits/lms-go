@@ -42,13 +42,16 @@ func Cksm(coefs []uint8, w ByteWindow, LS uint64) uint16 {
 
 // expands a message into the winternitz coefficients of the message and its checksum
 // returns a slice of length P
-func Expand(msg []byte, mode LmsOtsAlgorithmType) []uint8 {
-	params := mode.Params()
+func Expand(msg []byte, mode LmsOtsAlgorithmType) ([]uint8, error) {
+	params, err := mode.Params()
+	if err != nil {
+		return nil, err
+	}
 	res := Coefs(msg, params.W)
 	var cksm [2]byte
 	binary.BigEndian.PutUint16(cksm[:], Cksm(res, params.W, params.LS))
 
 	res = append(res, Coefs(cksm[:], params.W)...)
 
-	return res[:params.P]
+	return res[:params.P], nil
 }

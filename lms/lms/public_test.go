@@ -8,26 +8,26 @@ import (
 	"github.com/trailofbits/lms-go/lms/lms"
 )
 
+const SIGNATURE_HEX = "00000000000000040eb1ed54a2460d512388cad533138d240534e97b1e82d33bd927d201dfc24ebb0f43ba3ce13b058b3a4ea791ff0233fe67acf9761de946e5f447c9438cffa207a5093d2f01fa83ab4b9833348ab13cd5911cee2ef7ee72de172a59193b350021bfa1f5412de16430884a5b3833b07af15f56b1a2776887fec4a4ffbe90483c4fd15c05076fb3eafd6492375fe8ac3bd6724f09ec5ea6d8ad5a2f489d0c95bb552987e2e66b49dd899b040f07cf348a56945a17ba0e92a652b0aea6aceb0a081b7e8956069e4ca4c23e41b1c828f0b9568a316db7befde420e6508146280b7ca995489c54d3213f22a6fa378aabe304499df562f251f8c3d150a2cb2ea7cd159994fed104b6708814a3b974df688277da343a7b00060e049bf169cf2984fe5b88995229ef1535256dc67904808ded2ad6445edb25a9a4721c89af6a431e3cca7ae670601efccb251355c019b54113dfc7af43347b3157ecc2c7d371ac83cda5a91805046592a931674992528743e027cb68a3f0916de2ef8faaf85f656da7d332e0f5ed4d974a8b8a2078218754d9c7f4c1b920887b2aa3b2709bdf14c4a7a5021845c11799633f51eba25e4d530b6d8539258ebbc7d3fe3e55a4b335f37111dd99e7b6f6f44ec5c403f279da4fc60bde80e589001bca12c74ef01addf49f414c12d6718ffd0f178f60f21f883799210f01ed282e41073ef042c15cda541a2c1ea3c6760afc4da4e72891c12401a4c009b3fb692b3e90381febf118fa3507ca754a8f57ffd575574afbc1f3033d714ed18d88e35ce7203192134c016ee37eb5874056d4aaf4503dccba8dd6dd9a9b9257bf4ab9bced8dc5b43baf59ab2b9f39b12ae20ad0f24128927d9ba3d70459ed55d15dbae96783d5ed7344613f0b867ab45a67d44c09ee56c192277176b06168d5e64d6eb6b59550a836d6599955b164e375f7c62d827769adb1041c7caf23a686d22236e6d5fbc1452a320d673fa56e48223f1b1ee7beb4914556329d9a5467467709865023d8d18cd0707e78a457271bbb296ff74f6d0339613dd078444eb087cace78abbed8acc4a09f6867fd3c28ec948c945ed0b360eceecd561349d342060f7172c396a063a23b5c60340c62149eded0f068d75b19fa680890dcf1c4868f1f83cf63f6bd6a5c15a8e68f1f62a10d372c9bd3fbdbe6dd2ca090610afd7ed0bd30b1488deeddd7d0c1ee9312354355025a8555d77a3b711e005544d997334a580a82be82cf2e8da5d82c58fba775bb7421c433e80f4ddb53ac13e8fc3e3ab38f57cdddb09661f14a6994fd71c7944b57c73a52b3dd1cd9bb85e551db196371baa04c466be5c4306358c51b3a5a3c71ad50d3b4e969aee67fe60c77614de1402e1c54d0bd99291e16d2936da9c21f52e65bbc38a79568cafe7617918f4b05a01c56c17fc473d6da9dc28bae1c15d7f467ad305e122a2d6231b2ba80bf1308d2008728cc53999a368d23222cb1d0c783d223b9b503651a67560bfeb2f35ba544722620ec4086dcc77e6e87bb53f1f18cb843df77057ce113723c7cd09bad2a656a689a841d8ae0f7f47a1e0ed5294858000000058f10e6d54680f6e1bcbf5dbcb9c1d1628323b71c7247d6536858cb87dd52628955d38bb6d66d7f3c300e73b6dae29c30f474426590645ab69f7d317878ad0efbba2c6dc673188e75420b6b08350c8d269988a9cb106f5a70ef38f127b89e6addfd9aab02995e67e2ca5b8129a635b9429e7fb1606931047509a4240c425ac412fa4f51344dceef63bfd8d70fc2874f740ba8f9e77485958ddafb03c9f76a9580"
+
+const PUBKEY_HEX = "0000000500000004" +
+	"d08fabd4a2091ff0a8cb4ed834e74534" +
+	"8b9a583d74439771b52302706a4463e3" +
+	"e342a868bcb02f698f6316b6d92279f8"
+
+const MSG_HEX = "54686520656e756d65726174696f6e20696e2074686520436f6e737469747574696f6e2c206f66206365727461696e207269676874732c207368616c6c206e6f7420626520636f6e73747275656420746f2064656e79206f7220646973706172616765206f74686572732072657461696e6564206279207468652070656f706c652e0a"
+
 func TestVerify(t *testing.T) {
 	// Decode from hex
-	pubkeybytes, err := hex.DecodeString(
-		"0000000500000004" +
-			"d08fabd4a2091ff0a8cb4ed834e74534" +
-			"8b9a583d74439771b52302706a4463e3" +
-			"e342a868bcb02f698f6316b6d92279f8",
-	)
+	pubkeybytes, err := hex.DecodeString(PUBKEY_HEX)
 	if err != nil {
 		panic(err)
 	}
-	msg, err := hex.DecodeString(
-		"54686520656e756d65726174696f6e20696e2074686520436f6e737469747574696f6e2c206f66206365727461696e207269676874732c207368616c6c206e6f7420626520636f6e73747275656420746f2064656e79206f7220646973706172616765206f74686572732072657461696e6564206279207468652070656f706c652e0a",
-	)
+	msg, err := hex.DecodeString(MSG_HEX)
 	if err != nil {
 		panic(err)
 	}
-	sigbytes, err := hex.DecodeString(
-		"00000000000000040eb1ed54a2460d512388cad533138d240534e97b1e82d33bd927d201dfc24ebb0f43ba3ce13b058b3a4ea791ff0233fe67acf9761de946e5f447c9438cffa207a5093d2f01fa83ab4b9833348ab13cd5911cee2ef7ee72de172a59193b350021bfa1f5412de16430884a5b3833b07af15f56b1a2776887fec4a4ffbe90483c4fd15c05076fb3eafd6492375fe8ac3bd6724f09ec5ea6d8ad5a2f489d0c95bb552987e2e66b49dd899b040f07cf348a56945a17ba0e92a652b0aea6aceb0a081b7e8956069e4ca4c23e41b1c828f0b9568a316db7befde420e6508146280b7ca995489c54d3213f22a6fa378aabe304499df562f251f8c3d150a2cb2ea7cd159994fed104b6708814a3b974df688277da343a7b00060e049bf169cf2984fe5b88995229ef1535256dc67904808ded2ad6445edb25a9a4721c89af6a431e3cca7ae670601efccb251355c019b54113dfc7af43347b3157ecc2c7d371ac83cda5a91805046592a931674992528743e027cb68a3f0916de2ef8faaf85f656da7d332e0f5ed4d974a8b8a2078218754d9c7f4c1b920887b2aa3b2709bdf14c4a7a5021845c11799633f51eba25e4d530b6d8539258ebbc7d3fe3e55a4b335f37111dd99e7b6f6f44ec5c403f279da4fc60bde80e589001bca12c74ef01addf49f414c12d6718ffd0f178f60f21f883799210f01ed282e41073ef042c15cda541a2c1ea3c6760afc4da4e72891c12401a4c009b3fb692b3e90381febf118fa3507ca754a8f57ffd575574afbc1f3033d714ed18d88e35ce7203192134c016ee37eb5874056d4aaf4503dccba8dd6dd9a9b9257bf4ab9bced8dc5b43baf59ab2b9f39b12ae20ad0f24128927d9ba3d70459ed55d15dbae96783d5ed7344613f0b867ab45a67d44c09ee56c192277176b06168d5e64d6eb6b59550a836d6599955b164e375f7c62d827769adb1041c7caf23a686d22236e6d5fbc1452a320d673fa56e48223f1b1ee7beb4914556329d9a5467467709865023d8d18cd0707e78a457271bbb296ff74f6d0339613dd078444eb087cace78abbed8acc4a09f6867fd3c28ec948c945ed0b360eceecd561349d342060f7172c396a063a23b5c60340c62149eded0f068d75b19fa680890dcf1c4868f1f83cf63f6bd6a5c15a8e68f1f62a10d372c9bd3fbdbe6dd2ca090610afd7ed0bd30b1488deeddd7d0c1ee9312354355025a8555d77a3b711e005544d997334a580a82be82cf2e8da5d82c58fba775bb7421c433e80f4ddb53ac13e8fc3e3ab38f57cdddb09661f14a6994fd71c7944b57c73a52b3dd1cd9bb85e551db196371baa04c466be5c4306358c51b3a5a3c71ad50d3b4e969aee67fe60c77614de1402e1c54d0bd99291e16d2936da9c21f52e65bbc38a79568cafe7617918f4b05a01c56c17fc473d6da9dc28bae1c15d7f467ad305e122a2d6231b2ba80bf1308d2008728cc53999a368d23222cb1d0c783d223b9b503651a67560bfeb2f35ba544722620ec4086dcc77e6e87bb53f1f18cb843df77057ce113723c7cd09bad2a656a689a841d8ae0f7f47a1e0ed5294858000000058f10e6d54680f6e1bcbf5dbcb9c1d1628323b71c7247d6536858cb87dd52628955d38bb6d66d7f3c300e73b6dae29c30f474426590645ab69f7d317878ad0efbba2c6dc673188e75420b6b08350c8d269988a9cb106f5a70ef38f127b89e6addfd9aab02995e67e2ca5b8129a635b9429e7fb1606931047509a4240c425ac412fa4f51344dceef63bfd8d70fc2874f740ba8f9e77485958ddafb03c9f76a9580",
-	)
+	sigbytes, err := hex.DecodeString(SIGNATURE_HEX)
 	if err != nil {
 		panic(err)
 	}
@@ -54,6 +54,41 @@ func TestVerify(t *testing.T) {
 	assert.False(t, result)
 }
 
+func TestVerifyWrongType(t *testing.T) {
+	// Public key typecode does not match signature typecode
+	// typecode is 8 here, should be 5
+	pubkeybytes, err := hex.DecodeString(
+		"0000000800000004" +
+			"d08fabd4a2091ff0a8cb4ed834e74534" +
+			"8b9a583d74439771b52302706a4463e3" +
+			"e342a868bcb02f698f6316b6d92279f8",
+	)
+	if err != nil {
+		panic(err)
+	}
+	msg, err := hex.DecodeString(MSG_HEX)
+	if err != nil {
+		panic(err)
+	}
+	sigbytes, err := hex.DecodeString(SIGNATURE_HEX)
+	if err != nil {
+		panic(err)
+	}
+
+	publickey, err := lms.LmsPublicKeyFromBytes(pubkeybytes)
+	if err != nil {
+		panic(err)
+	}
+
+	sig, err := lms.LmsSignatureFromBytes(sigbytes)
+	if err != nil {
+		panic(err)
+	}
+
+	result := publickey.Verify(msg, sig)
+	assert.False(t, result)
+}
+
 func TestShortPublicKeyReturnsError(t *testing.T) {
 	// Less than 8 bytes
 	pub_bytes, err := hex.DecodeString("01020304050607")
@@ -66,12 +101,7 @@ func TestShortPublicKeyReturnsError(t *testing.T) {
 
 func TestEncode(t *testing.T) {
 	// Decode from hex
-	pubkeybytes, err := hex.DecodeString(
-		"0000000500000004" +
-			"d08fabd4a2091ff0a8cb4ed834e74534" +
-			"8b9a583d74439771b52302706a4463e3" +
-			"e342a868bcb02f698f6316b6d92279f8",
-	)
+	pubkeybytes, err := hex.DecodeString(PUBKEY_HEX)
 	if err != nil {
 		panic(err)
 	}
@@ -617,4 +647,89 @@ func TestRfc8554KAT2(t *testing.T) {
 	}
 	result := pk.Verify(message_bytes, sig)
 	assert.True(t, result)
+}
+
+// Fuzzers
+func FuzzPubkeyFromBytes(f *testing.F) {
+	pubkeybytes, _ := hex.DecodeString(PUBKEY_HEX)
+	f.Add(pubkeybytes)
+
+	f.Fuzz(func(t *testing.T, bytes []byte) {
+		pk, err := lms.LmsPublicKeyFromBytes(bytes)
+		if err != nil {
+			return
+		}
+		pk.ToBytes()
+	})
+}
+
+func FuzzSigFromBytes(f *testing.F) {
+	sigBytes, _ := hex.DecodeString(SIGNATURE_HEX)
+	f.Add(sigBytes)
+
+	f.Fuzz(func(t *testing.T, bytes []byte) {
+		sig, err := lms.LmsSignatureFromBytes(bytes)
+		if err != nil {
+			return
+		}
+		_, _ = sig.ToBytes()
+	})
+}
+
+func FuzzVerifyFixedSig(f *testing.F) {
+	pubkeybytes, _ := hex.DecodeString(PUBKEY_HEX)
+
+	testcases := [][]byte{pubkeybytes}
+	for _, tc := range testcases {
+		f.Add(tc)
+	}
+
+	signatureBytes, _ := hex.DecodeString(SIGNATURE_HEX)
+	signature, _ := lms.LmsSignatureFromBytes(signatureBytes)
+
+	msg, _ := hex.DecodeString(MSG_HEX)
+
+	f.Fuzz(func(t *testing.T, bytes []byte) {
+		pk, err := lms.LmsPublicKeyFromBytes(bytes)
+		if err != nil {
+			return
+		}
+
+		pk.Verify(msg, signature)
+	})
+}
+
+func FuzzVerifyFixedPub(f *testing.F) {
+	signatureBytes, _ := hex.DecodeString(SIGNATURE_HEX)
+
+	testcases := [][]byte{signatureBytes}
+	for _, tc := range testcases {
+		f.Add(tc)
+	}
+
+	pubkeybytes, _ := hex.DecodeString(PUBKEY_HEX)
+	pk, _ := lms.LmsPublicKeyFromBytes(pubkeybytes)
+
+	msg, _ := hex.DecodeString(MSG_HEX)
+
+	f.Fuzz(func(t *testing.T, bytes []byte) {
+		signature, err := lms.LmsSignatureFromBytes(bytes)
+		if err != nil {
+			return
+		}
+
+		pk.Verify(msg, signature)
+	})
+}
+
+func FuzzVerifyMsg(f *testing.F) {
+	pubkeybytes, _ := hex.DecodeString(PUBKEY_HEX)
+	pk, _ := lms.LmsPublicKeyFromBytes(pubkeybytes)
+
+	signatureBytes, _ := hex.DecodeString(SIGNATURE_HEX)
+	signature, _ := lms.LmsSignatureFromBytes(signatureBytes)
+
+	f.Fuzz(func(t *testing.T, bytes []byte) {
+		pk.Verify(bytes, signature)
+	})
 }

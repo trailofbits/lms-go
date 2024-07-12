@@ -48,10 +48,16 @@ func (pub *LmsPublicKey) Verify(msg []byte, sig LmsSignature) bool {
 	if err != nil {
 		return false
 	}
+
+	// algorithm 6a step 2.g
+	if sig.typecode != pub.typecode {
+		return false
+	}
+
 	height := int(params.H)
 	leaves := uint32(1 << height)
 
-	key_candidate, valid := sig.ots.RecoverPublicKey(msg, pub.id, sig.q)
+	key_candidate, valid := sig.ots.RecoverPublicKey(msg, pub.otstype, pub.id, sig.q)
 	if !valid {
 		return false
 	}

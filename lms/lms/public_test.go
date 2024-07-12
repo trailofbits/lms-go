@@ -655,7 +655,11 @@ func FuzzPubkeyFromBytes(f *testing.F) {
 	f.Add(pubkeybytes)
 
 	f.Fuzz(func(t *testing.T, bytes []byte) {
-		lms.LmsPublicKeyFromBytes(bytes)
+		pk, err := lms.LmsPublicKeyFromBytes(bytes)
+		if err != nil {
+			return
+		}
+		pk.ToBytes()
 	})
 }
 
@@ -664,7 +668,11 @@ func FuzzSigFromBytes(f *testing.F) {
 	f.Add(sigBytes)
 
 	f.Fuzz(func(t *testing.T, bytes []byte) {
-		lms.LmsSignatureFromBytes(bytes)
+		sig, err := lms.LmsSignatureFromBytes(bytes)
+		if err != nil {
+			return
+		}
+		_, _ = sig.ToBytes()
 	})
 }
 

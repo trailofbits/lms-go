@@ -14,13 +14,8 @@ import (
 // Verify returns true if sig is valid for msg and this public key.
 // It returns false otherwise.
 func (pub *LmsOtsPublicKey) Verify(msg []byte, sig LmsOtsSignature) bool {
-	// sanity check ots type
-	if pub.typecode != sig.typecode {
-		return false
-	}
-
 	// try to recover the public key
-	kc, valid := sig.RecoverPublicKey(msg, pub.id, pub.q)
+	kc, valid := sig.RecoverPublicKey(msg, pub.typecode, pub.id, pub.q)
 
 	// this short circuits if valid == false and does the key comparison otherwise
 	return valid && subtle.ConstantTimeCompare(pub.k, kc.k) == 1
@@ -28,10 +23,16 @@ func (pub *LmsOtsPublicKey) Verify(msg []byte, sig LmsOtsSignature) bool {
 
 // RecoverPublicKey calculates the public key for a given message.
 // This is used in signature verification.
-func (sig *LmsOtsSignature) RecoverPublicKey(msg []byte, id common.ID, q uint32) (LmsOtsPublicKey, bool) {
+func (sig *LmsOtsSignature) RecoverPublicKey(msg []byte, pubtype common.LmsOtsAlgorithmType, id common.ID, q uint32) (LmsOtsPublicKey, bool) {
 	var be16 [2]byte
 	var be32 [4]byte
 	var tmp []byte
+
+	// algorithm 4b step 2.b
+	if pubtype != sig.typecode {
+		return LmsOtsPublicKey{}, false
+	}
+
 	params, err := sig.typecode.Params()
 	if err != nil {
 		return LmsOtsPublicKey{}, false

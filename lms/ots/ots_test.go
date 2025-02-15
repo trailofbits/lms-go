@@ -30,6 +30,22 @@ func TestOtsSignVerify(t *testing.T) {
 			name:     "LMOTS_SHA256_N32_W8",
 			typecode: common.LMOTS_SHA256_N32_W8.ToUint32(),
 		},
+		{
+			name:     "LMOTS_SHA256_N24_W1",
+			typecode: common.LMOTS_SHA256_N24_W1.ToUint32(),
+		},
+		{
+			name:     "LMOTS_SHA256_N24_W2",
+			typecode: common.LMOTS_SHA256_N24_W2.ToUint32(),
+		},
+		{
+			name:     "LMOTS_SHA256_N24_W4",
+			typecode: common.LMOTS_SHA256_N24_W4.ToUint32(),
+		},
+		{
+			name:     "LMOTS_SHA256_N24_W8",
+			typecode: common.LMOTS_SHA256_N24_W8.ToUint32(),
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var err error

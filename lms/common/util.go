@@ -6,6 +6,7 @@ package common
 
 import (
 	"encoding/binary"
+	"hash"
 )
 
 // Returns a []byte representing the Winternitz coefficients of x for a given window, w
@@ -54,4 +55,18 @@ func Expand(msg []byte, mode LmsOtsAlgorithmType) ([]uint8, error) {
 	res = append(res, Coefs(cksm[:], params.W)...)
 
 	return res[:params.P], nil
+}
+
+// HashWrite wraps h.Write with a paic.
+func HashWrite(h hash.Hash, x []byte) {
+	_, err := h.Write(x)
+	if err != nil {
+		panic("hash.Hash.Write never errors")
+	}
+}
+
+// HashSum wraps Hash.Sum, returning the n leftmost bytes.
+// Panics if n is larger than the length of the hash output.
+func HashSum(h hash.Hash, n uint64) []byte {
+	return h.Sum(nil)[:n]
 }

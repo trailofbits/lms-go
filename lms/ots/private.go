@@ -9,16 +9,8 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
-	"hash"
 	"io"
 )
-
-func hash_write(h hash.Hash, x []byte) {
-	_, err := h.Write(x)
-	if err != nil {
-		panic("hash.Hash.Write never errors")
-	}
-}
 
 // NewPrivateKey returns a LmsOtsPrivateKey, seeded by a cryptographically secure
 // random number generator.
@@ -54,13 +46,13 @@ func NewPrivateKeyFromSeed(tc common.LmsOtsAlgorithmType, q uint32, id common.ID
 		binary.BigEndian.PutUint32(q_be[:], q)
 		binary.BigEndian.PutUint16(i_be[:], uint16(i))
 
-		hash_write(hasher, id[:])
-		hash_write(hasher, q_be[:])
-		hash_write(hasher, i_be[:])
-		hash_write(hasher, []byte{0xff})
-		hash_write(hasher, seed)
+		common.HashWrite(hasher, id[:])
+		common.HashWrite(hasher, q_be[:])
+		common.HashWrite(hasher, i_be[:])
+		common.HashWrite(hasher, []byte{0xff})
+		common.HashWrite(hasher, seed)
 
-		x[i] = hasher.Sum(nil)
+		x[i] = common.HashSum(hasher, params.N)
 	}
 
 	return LmsOtsPrivateKey{
@@ -84,9 +76,9 @@ func (x *LmsOtsPrivateKey) Public() (LmsOtsPublicKey, error) {
 	hasher := params.H.New()
 	binary.BigEndian.PutUint32(be32[:], x.q)
 
-	hash_write(hasher, x.id[:])
-	hash_write(hasher, be32[:])
-	hash_write(hasher, common.D_PBLC[:])
+	common.HashWrite(hasher, x.id[:])
+	common.HashWrite(hasher, be32[:])
+	common.HashWrite(hasher, common.D_PBLC[:])
 
 	for i := uint64(0); i < params.P; i++ {
 		tmp = make([]byte, len(x.x[i]))
@@ -98,23 +90,23 @@ func (x *LmsOtsPrivateKey) Public() (LmsOtsPublicKey, error) {
 			binary.BigEndian.PutUint32(be32[:], x.q)
 			binary.BigEndian.PutUint16(be16[:], uint16(i))
 
-			hash_write(inner, x.id[:])
-			hash_write(inner, be32[:])
-			hash_write(inner, be16[:])
-			hash_write(inner, []byte{byte(j)})
-			hash_write(inner, tmp)
+			common.HashWrite(inner, x.id[:])
+			common.HashWrite(inner, be32[:])
+			common.HashWrite(inner, be16[:])
+			common.HashWrite(inner, []byte{byte(j)})
+			common.HashWrite(inner, tmp)
 
-			tmp = inner.Sum(nil)
+			tmp = common.HashSum(inner, params.N)
 		}
 
-		hash_write(hasher, tmp)
+		common.HashWrite(hasher, tmp)
 	}
 
 	return LmsOtsPublicKey{
 		typecode: x.typecode,
 		q:        x.q,
 		id:       x.id,
-		k:        hasher.Sum(nil),
+		k:        common.HashSum(hasher, params.N),
 	}, nil
 }
 
@@ -145,13 +137,13 @@ func (x *LmsOtsPrivateKey) Sign(msg []byte, rng io.Reader) (LmsOtsSignature, err
 
 	binary.BigEndian.PutUint32(be32[:], x.q)
 
-	hash_write(hasher, x.id[:])
-	hash_write(hasher, be32[:])
-	hash_write(hasher, common.D_MESG[:])
-	hash_write(hasher, c)
-	hash_write(hasher, msg)
+	common.HashWrite(hasher, x.id[:])
+	common.HashWrite(hasher, be32[:])
+	common.HashWrite(hasher, common.D_MESG[:])
+	common.HashWrite(hasher, c)
+	common.HashWrite(hasher, msg)
 
-	q := hasher.Sum(nil)
+	q := common.HashSum(hasher, params.N)
 	expanded, err := common.Expand(q, x.typecode)
 	if err != nil {
 		return LmsOtsSignature{}, err
@@ -170,13 +162,13 @@ func (x *LmsOtsPrivateKey) Sign(msg []byte, rng io.Reader) (LmsOtsSignature, err
 			binary.BigEndian.PutUint32(be32[:], x.q)
 			binary.BigEndian.PutUint16(be16[:], uint16(i))
 
-			hash_write(inner, x.id[:])
-			hash_write(inner, be32[:])
-			hash_write(inner, be16[:])
-			hash_write(inner, []byte{byte(j)})
-			hash_write(inner, y[i])
+			common.HashWrite(inner, x.id[:])
+			common.HashWrite(inner, be32[:])
+			common.HashWrite(inner, be16[:])
+			common.HashWrite(inner, []byte{byte(j)})
+			common.HashWrite(inner, y[i])
 
-			y[i] = inner.Sum(nil)
+			y[i] = common.HashSum(inner, params.N)
 		}
 
 		// y[i] is now the correct value

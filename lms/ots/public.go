@@ -38,7 +38,7 @@ func (sig *LmsOtsSignature) RecoverPublicKey(msg []byte, pubtype common.LmsOtsAl
 		return LmsOtsPublicKey{}, false
 	}
 	hasher := params.H.New()
-	hash_len := hasher.Size()
+	hash_len := int(params.N)
 
 	// verify length of nonce
 	if len(sig.c) != hash_len {
@@ -57,22 +57,22 @@ func (sig *LmsOtsSignature) RecoverPublicKey(msg []byte, pubtype common.LmsOtsAl
 
 	binary.BigEndian.PutUint32(be32[:], q)
 
-	hash_write(hasher, id[:])
-	hash_write(hasher, be32[:])
-	hash_write(hasher, common.D_MESG[:])
-	hash_write(hasher, sig.c)
-	hash_write(hasher, msg)
+	common.HashWrite(hasher, id[:])
+	common.HashWrite(hasher, be32[:])
+	common.HashWrite(hasher, common.D_MESG[:])
+	common.HashWrite(hasher, sig.c)
+	common.HashWrite(hasher, msg)
 
-	Q := hasher.Sum(nil)
+	Q := common.HashSum(hasher, params.N)
 	expanded, err := common.Expand(Q, sig.typecode)
 	if err != nil {
 		return LmsOtsPublicKey{}, false
 	}
 
 	hasher.Reset()
-	hash_write(hasher, id[:])
-	hash_write(hasher, be32[:])
-	hash_write(hasher, common.D_PBLC[:])
+	common.HashWrite(hasher, id[:])
+	common.HashWrite(hasher, be32[:])
+	common.HashWrite(hasher, common.D_PBLC[:])
 
 	for i := uint64(0); i < params.P; i++ {
 		a := uint64(expanded[i])
@@ -85,23 +85,23 @@ func (sig *LmsOtsSignature) RecoverPublicKey(msg []byte, pubtype common.LmsOtsAl
 			binary.BigEndian.PutUint32(be32[:], q)
 			binary.BigEndian.PutUint16(be16[:], uint16(i))
 
-			hash_write(inner, id[:])
-			hash_write(inner, be32[:])
-			hash_write(inner, be16[:])
-			hash_write(inner, []byte{byte(j)})
-			hash_write(inner, tmp)
+			common.HashWrite(inner, id[:])
+			common.HashWrite(inner, be32[:])
+			common.HashWrite(inner, be16[:])
+			common.HashWrite(inner, []byte{byte(j)})
+			common.HashWrite(inner, tmp)
 
-			tmp = inner.Sum(nil)
+			tmp = common.HashSum(inner, params.N)
 		}
 
-		hash_write(hasher, tmp)
+		common.HashWrite(hasher, tmp)
 	}
 
 	return LmsOtsPublicKey{
 		typecode: sig.typecode,
 		q:        q,
 		id:       id,
-		k:        hasher.Sum(nil),
+		k:        common.HashSum(hasher, params.N),
 	}, true
 }
 

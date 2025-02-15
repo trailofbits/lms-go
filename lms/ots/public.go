@@ -118,7 +118,7 @@ func LmsOtsPublicKeyFromBytes(b []byte) (LmsOtsPublicKey, error) {
 		return LmsOtsPublicKey{}, errors.New("LmsOtsPublicKeyFromBytes(): OTS public key too short")
 	}
 	// The typecode is bytes 0-3 (4 bytes)
-	typecode, err := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[0:4])).LmsOtsType()
+	typecode, err := common.Uint32ToLmotsType(binary.BigEndian.Uint32(b[0:4])).LmsOtsType()
 	if err != nil {
 		return LmsOtsPublicKey{}, err
 	}

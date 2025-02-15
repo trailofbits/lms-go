@@ -143,7 +143,7 @@ func LmsPublicKeyFromBytes(b []byte) (LmsPublicKey, error) {
 		return LmsPublicKey{}, err
 	}
 	// The OTS typecode is bytes 4-7 (4 bytes)
-	otstype, err := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[4:8])).LmsOtsType()
+	otstype, err := common.Uint32ToLmotsType(binary.BigEndian.Uint32(b[4:8])).LmsOtsType()
 	if err != nil {
 		return LmsPublicKey{}, err
 	}

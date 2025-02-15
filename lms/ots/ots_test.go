@@ -36,82 +36,60 @@ func TestOtsSignVerify(t *testing.T) {
 
 			id, err := hex.DecodeString("d08fabd4a2091ff0a8cb4ed834e74534")
 			if err != nil {
-				panic(err)
+				t.Fatalf("hex.DecodeString() = %v", err)
 			}
 
-			ots_priv, err := ots.NewPrivateKey(common.Uint32ToLmotsType(tc.typecode), 0, common.ID(id))
+			otsPriv, err := ots.NewPrivateKey(common.Uint32ToLmotsType(tc.typecode), 0, common.ID(id))
 			if err != nil {
-				panic(err)
+				t.Fatalf("ots.NewPrivateKey() = %v", err)
 			}
 
-			ots_pub, err := ots_priv.Public()
+			otsPub, err := otsPriv.Public()
 			if err != nil {
-				panic(err)
+				t.Fatalf("otsPriv.Public() = %v", err)
 			}
-			ots_sig, err := ots_priv.Sign([]byte("example"), nil)
+			otsSig, err := otsPriv.Sign([]byte("example"), nil)
 			if err != nil {
-				panic(err)
-			}
-
-			result := ots_pub.Verify([]byte("example"), ots_sig)
-			assert.True(t, result)
-		})
-	}
-}
-
-func TestOtsSignVerifyFail(t *testing.T) {
-	for _, tc := range []struct {
-		name     string
-		typecode uint32
-	}{
-		{
-			name:     "LMOTS_SHA256_N32_W1",
-			typecode: common.LMOTS_SHA256_N32_W1.ToUint32(),
-		},
-		{
-			name:     "LMOTS_SHA256_N32_W2",
-			typecode: common.LMOTS_SHA256_N32_W2.ToUint32(),
-		},
-		{
-			name:     "LMOTS_SHA256_N32_W4",
-			typecode: common.LMOTS_SHA256_N32_W4.ToUint32(),
-		},
-		{
-			name:     "LMOTS_SHA256_N32_W8",
-			typecode: common.LMOTS_SHA256_N32_W8.ToUint32(),
-		},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			var err error
-
-			id, err := hex.DecodeString("d08fabd4a2091ff0a8cb4ed834e74534")
-			if err != nil {
-				panic(err)
+				t.Fatalf("otsPriv.Sign() = %v", err)
 			}
 
-			ots_priv, err := ots.NewPrivateKey(common.Uint32ToLmotsType(tc.typecode), 0, common.ID(id))
-			if err != nil {
-				panic(err)
-			}
+			t.Run("VerifyOK", func(t *testing.T) {
+				result := otsPub.Verify([]byte("example"), otsSig)
+				assert.True(t, result)
+			})
 
-			ots_pub, err := ots_priv.Public()
-			if err != nil {
-				panic(err)
-			}
-			ots_sig, err := ots_priv.Sign([]byte("example"), nil)
-			if err != nil {
-				panic(err)
-			}
+			t.Run("VerifyBadPubFail", func(t *testing.T) {
+				// modify q so that the verification fails
+				otsPubBytes := otsPub.ToBytes()
+				otsPubBytes[23] ^= 1
+				otsPub2, err := ots.LmsOtsPublicKeyFromBytes(otsPubBytes)
+				if err != nil {
+					t.Fatalf("LmsOtsPublicKeyFromBytes() = %v", err)
+				}
+				result := otsPub2.Verify([]byte("example"), otsSig)
+				assert.False(t, result)
+			})
 
-			// modify q so that the verification fails
-			ots_pub_bytes := ots_pub.ToBytes()
-			ots_pub_bytes[23] = 1
-			ots_pub, err = ots.LmsOtsPublicKeyFromBytes(ots_pub_bytes)
-			if err != nil {
-				panic(err)
-			}
-			result := ots_pub.Verify([]byte("example"), ots_sig)
-			assert.False(t, result)
+			t.Run("VerifyBadSigFail", func(t *testing.T) {
+				// modify sig so that the verification fails
+				otsSigBytes, err := otsSig.ToBytes()
+				if err != nil {
+					t.Fatalf("otsSig.ToBytes() = %v", err)
+				}
+				otsSigBytes[23] ^= 1
+				otsSig2, err := ots.LmsOtsSignatureFromBytes(otsSigBytes)
+				if err != nil {
+					t.Fatalf("LmsOtsPublicKeyFromBytes() = %v", err)
+				}
+				result := otsPub.Verify([]byte("example"), otsSig2)
+				assert.False(t, result)
+			})
+
+			t.Run("VerifyBadMsgFail", func(t *testing.T) {
+				// try to verify a different message
+				result := otsPub.Verify([]byte("example2"), otsSig)
+				assert.False(t, result)
+			})
 		})
 	}
 }

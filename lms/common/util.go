@@ -57,7 +57,7 @@ func Expand(msg []byte, mode LmsOtsAlgorithmType) ([]uint8, error) {
 	return res[:params.P], nil
 }
 
-// HashWrite wraps h.Write with a paic.
+// HashWrite wraps h.Write with a panic.
 func HashWrite(h hash.Hash, x []byte) {
 	_, err := h.Write(x)
 	if err != nil {

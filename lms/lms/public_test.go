@@ -649,7 +649,7 @@ func TestRfc8554KAT2(t *testing.T) {
 	assert.True(t, result)
 }
 
-// From the HSS test vectors in RFC 8554
+// From the SHA256/192 test vector in https://datatracker.ietf.org/doc/draft-fluhrer-lms-more-parm-sets/19/
 func TestSha256192KAT1(t *testing.T) {
 	var publicKeyBytes = []byte{
 		// LMS type: LMS_SHA256_M32_H20

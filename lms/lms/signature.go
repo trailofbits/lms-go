@@ -55,7 +55,7 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 	q := binary.BigEndian.Uint32(b[0:4])
 
 	// The OTS signature starts at byte 4, with the typecode first
-	otstc := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[4:8]))
+	otstc := common.Uint32ToLmotsType(binary.BigEndian.Uint32(b[4:8]))
 	// Return error if not a valid LM-OTS algorithm:
 	_, err = otstc.LmsOtsType()
 	if err != nil {

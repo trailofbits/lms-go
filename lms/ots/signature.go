@@ -17,7 +17,7 @@ func LmsOtsSignatureFromBytes(b []byte) (LmsOtsSignature, error) {
 	}
 
 	// Typecode is the first 4 bytes
-	typecode := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[0:4]))
+	typecode := common.Uint32ToLmotsType(binary.BigEndian.Uint32(b[0:4]))
 	// Panic if not a valid LM-OTS algorithm:
 	params, err := typecode.Params()
 	if err != nil {

@@ -45,30 +45,53 @@ func (w window) Mask() uint8 {
 	}
 }
 
-type lms_type_code uint32
+// lmsTypecode represents a typecode for LMS.
+// See https://www.iana.org/assignments/leighton-micali-signatures/leighton-micali-signatures.xhtml#leighton-micali-signatures-1
+type lmsTypecode uint32
 
 const (
-	LMS_RESERVED lms_type_code = iota
-	LMOTS_SHA256_N32_W1
-	LMOTS_SHA256_N32_W2
-	LMOTS_SHA256_N32_W4
-	LMOTS_SHA256_N32_W8
-	LMS_SHA256_M32_H5
-	LMS_SHA256_M32_H10
-	LMS_SHA256_M32_H15
-	LMS_SHA256_M32_H20
-	LMS_SHA256_M32_H25
+	LMS_RESERVED       lmsTypecode = 0x00000000
+	lmsTypecodeFirst               = LMS_SHA256_M32_H5
+	LMS_SHA256_M32_H5  lmsTypecode = 0x00000005
+	LMS_SHA256_M32_H10 lmsTypecode = 0x00000006
+	LMS_SHA256_M32_H15 lmsTypecode = 0x00000007
+	LMS_SHA256_M32_H20 lmsTypecode = 0x00000008
+	LMS_SHA256_M32_H25 lmsTypecode = 0x00000009
+	LMS_SHA256_M24_H5  lmsTypecode = 0x0000000A
+	LMS_SHA256_M24_H10 lmsTypecode = 0x0000000B
+	LMS_SHA256_M24_H15 lmsTypecode = 0x0000000C
+	LMS_SHA256_M24_H20 lmsTypecode = 0x0000000D
+	LMS_SHA256_M24_H25 lmsTypecode = 0x0000000E
+	lmsTypecodeLast                = LMS_SHA256_M24_H25
+)
+
+// lmotsTypecode represents a typecode for LM-OTS.
+// See https://www.iana.org/assignments/leighton-micali-signatures/leighton-micali-signatures.xhtml#lm-ots-signatures
+type lmotsTypecode uint32
+
+const (
+	LMOTS_RESERVED      lmotsTypecode = 0x00000000
+	lmotsTypecodeFirst                = LMOTS_SHA256_N32_W1
+	LMOTS_SHA256_N32_W1 lmotsTypecode = 0x00000001
+	LMOTS_SHA256_N32_W2 lmotsTypecode = 0x00000002
+	LMOTS_SHA256_N32_W4 lmotsTypecode = 0x00000003
+	LMOTS_SHA256_N32_W8 lmotsTypecode = 0x00000004
+	LMOTS_SHA256_N24_W1 lmotsTypecode = 0x00000005
+	LMOTS_SHA256_N24_W2 lmotsTypecode = 0x00000006
+	LMOTS_SHA256_N24_W4 lmotsTypecode = 0x00000007
+	LMOTS_SHA256_N24_W8 lmotsTypecode = 0x00000008
+	lmotsTypecodeLast                 = LMOTS_SHA256_N24_W8
 )
 
 // LmsAlgorithmType represents a specific instance of LMS
 type LmsAlgorithmType interface {
-	LmsType() (lms_type_code, error)
+	LmsType() (lmsTypecode, error)
 	LmsParams() (LmsParam, error)
 }
 
 // LmsOtsAlgorithmType represents a specific instance of LM-OTS
 type LmsOtsAlgorithmType interface {
-	LmsOtsType() (lms_type_code, error)
+	LmsOtsType() (lmotsTypecode, error)
 	Params() (LmsOtsParam, error)
 }
 
@@ -99,19 +122,19 @@ type LmsOtsParam struct {
 	SIG_LEN uint64     // total byte length for a valid signature
 }
 
-// Returns a lms_type_code, given a uint32 of the same value
-func Uint32ToLmsType(x uint32) lms_type_code {
-	return lms_type_code(x)
+// Returns a lmsTypecode, given a uint32 of the same value
+func Uint32ToLmsType(x uint32) lmsTypecode {
+	return lmsTypecode(x)
 }
 
-// Returns a uint32 of the same value as the lms_type_code
-func (x lms_type_code) ToUint32() uint32 {
+// Returns a uint32 of the same value as the lmsTypecode
+func (x lmsTypecode) ToUint32() uint32 {
 	return uint32(x)
 }
 
-// Returns a lms_type_code if within a valid range for LMS; otherwise, an error
-func (x lms_type_code) LmsType() (lms_type_code, error) {
-	if x >= LMS_SHA256_M32_H5 && x <= LMS_SHA256_M32_H25 {
+// Returns a lmsTypecode if within a valid range for LMS; otherwise, an error
+func (x lmsTypecode) LmsType() (lmsTypecode, error) {
+	if x >= lmsTypecodeFirst && x <= lmsTypecodeLast {
 		return x, nil
 	} else {
 		return x, errors.New("LmsType(): invalid type code")
@@ -119,8 +142,8 @@ func (x lms_type_code) LmsType() (lms_type_code, error) {
 }
 
 // Returns the expected signature length for an LMS type, given an associated LM-OTS type
-func (x lms_type_code) LmsSigLength(otstc lms_type_code) (uint64, error) {
-	if x >= LMS_SHA256_M32_H5 && x <= LMS_SHA256_M32_H25 {
+func (x lmsTypecode) LmsSigLength(otstc lmotsTypecode) (uint64, error) {
+	if x >= lmsTypecodeFirst && x <= lmsTypecodeLast {
 		params, err := x.LmsParams()
 		if err != nil {
 			return 0, err
@@ -135,9 +158,19 @@ func (x lms_type_code) LmsSigLength(otstc lms_type_code) (uint64, error) {
 	}
 }
 
-// Returns a lms_type_code if within a valid range for LM-OTS; otherwise, an error
-func (x lms_type_code) LmsOtsType() (lms_type_code, error) {
-	if x >= LMOTS_SHA256_N32_W1 && x <= LMOTS_SHA256_N32_W8 {
+// Returns a lmotsTypecode, given a uint32 of the same value
+func Uint32ToLmotsType(x uint32) lmotsTypecode {
+	return lmotsTypecode(x)
+}
+
+// Returns a uint32 of the same value as the lmotsTypecode
+func (x lmotsTypecode) ToUint32() uint32 {
+	return uint32(x)
+}
+
+// Returns a lmotsTypecode if within a valid range for LM-OTS; otherwise, an error
+func (x lmotsTypecode) LmsOtsType() (lmotsTypecode, error) {
+	if x >= lmotsTypecodeFirst && x <= lmotsTypecodeLast {
 		return x, nil
 	} else {
 		return x, errors.New("LmsOtsType(): invalid type code")
@@ -145,8 +178,8 @@ func (x lms_type_code) LmsOtsType() (lms_type_code, error) {
 }
 
 // Returns the expected byte length of a given LM-OTS signature algorithm
-func (x lms_type_code) LmsOtsSigLength() (uint64, error) {
-	if x >= LMOTS_SHA256_N32_W1 && x <= LMOTS_SHA256_N32_W8 {
+func (x lmotsTypecode) LmsOtsSigLength() (uint64, error) {
+	if x >= lmotsTypecodeFirst && x <= lmotsTypecodeLast {
 		params, err := x.Params()
 		if err != nil {
 			return 0, err
@@ -157,8 +190,8 @@ func (x lms_type_code) LmsOtsSigLength() (uint64, error) {
 	}
 }
 
-// Returns a LmsParam corresponding to the lms_type_code, x
-func (x lms_type_code) LmsParams() (LmsParam, error) {
+// Returns a LmsParam corresponding to the lmsTypecode, x
+func (x lmsTypecode) LmsParams() (LmsParam, error) {
 	switch x {
 	case LMS_SHA256_M32_H5:
 		return LmsParam{
@@ -190,13 +223,43 @@ func (x lms_type_code) LmsParams() (LmsParam, error) {
 			M:    32,
 			H:    25,
 		}, nil
+	case LMS_SHA256_M24_H5:
+		return LmsParam{
+			Hash: Sha256Hasher{},
+			M:    24,
+			H:    5,
+		}, nil
+	case LMS_SHA256_M24_H10:
+		return LmsParam{
+			Hash: Sha256Hasher{},
+			M:    24,
+			H:    10,
+		}, nil
+	case LMS_SHA256_M24_H15:
+		return LmsParam{
+			Hash: Sha256Hasher{},
+			M:    24,
+			H:    15,
+		}, nil
+	case LMS_SHA256_M24_H20:
+		return LmsParam{
+			Hash: Sha256Hasher{},
+			M:    24,
+			H:    20,
+		}, nil
+	case LMS_SHA256_M24_H25:
+		return LmsParam{
+			Hash: Sha256Hasher{},
+			M:    24,
+			H:    25,
+		}, nil
 	default:
 		return LmsParam{}, errors.New("LmsParams(): invalid type code")
 	}
 }
 
-// Returns a LmsOtsParam corresponding to the lms_type_code, x
-func (x lms_type_code) Params() (LmsOtsParam, error) {
+// Returns a LmsOtsParam corresponding to the lmsTypecode, x
+func (x lmotsTypecode) Params() (LmsOtsParam, error) {
 	switch x {
 	case LMOTS_SHA256_N32_W1:
 		return LmsOtsParam{
@@ -233,6 +296,42 @@ func (x lms_type_code) Params() (LmsOtsParam, error) {
 			P:       34,
 			LS:      0,
 			SIG_LEN: 1124,
+		}, nil
+	case LMOTS_SHA256_N24_W1:
+		return LmsOtsParam{
+			H:       Sha256Hasher{},
+			N:       24,
+			W:       WINDOW_W1,
+			P:       200,
+			LS:      8,
+			SIG_LEN: 4828,
+		}, nil
+	case LMOTS_SHA256_N24_W2:
+		return LmsOtsParam{
+			H:       Sha256Hasher{},
+			N:       24,
+			W:       WINDOW_W2,
+			P:       101,
+			LS:      6,
+			SIG_LEN: 2452,
+		}, nil
+	case LMOTS_SHA256_N24_W4:
+		return LmsOtsParam{
+			H:       Sha256Hasher{},
+			N:       24,
+			W:       WINDOW_W4,
+			P:       51,
+			LS:      4,
+			SIG_LEN: 1252,
+		}, nil
+	case LMOTS_SHA256_N24_W8:
+		return LmsOtsParam{
+			H:       Sha256Hasher{},
+			N:       24,
+			W:       WINDOW_W8,
+			P:       26,
+			LS:      0,
+			SIG_LEN: 652,
 		}, nil
 	default:
 		return LmsOtsParam{}, errors.New("Params(): invalid type code")

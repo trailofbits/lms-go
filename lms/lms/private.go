@@ -11,16 +11,8 @@ import (
 	"github.com/trailofbits/lms-go/lms/ots"
 
 	"crypto/rand"
-	"hash"
 	"io"
 )
-
-func hash_write(h hash.Hash, x []byte) {
-	_, err := h.Write(x)
-	if err != nil {
-		panic("hash.Hash.Write never errors")
-	}
-}
 
 // NewPrivateKey returns a LmsPrivateKey, seeded by a cryptographically secure
 // random number generator.
@@ -186,7 +178,7 @@ func LmsPrivateKeyFromBytes(b []byte) (LmsPrivateKey, error) {
 		return LmsPrivateKey{}, err
 	}
 	// The OTS typecode is bytes 4-7 (4 bytes)
-	otstype, err := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[4:8])).LmsOtsType()
+	otstype, err := common.Uint32ToLmotsType(binary.BigEndian.Uint32(b[4:8])).LmsOtsType()
 	if err != nil {
 		return LmsPrivateKey{}, err
 	}
@@ -249,11 +241,11 @@ func GeneratePKTree(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType
 		binary.BigEndian.PutUint32(r_be[:], r)
 
 		hasher := ots_params.H.New()
-		hash_write(hasher, id[:])
-		hash_write(hasher, r_be[:])
-		hash_write(hasher, common.D_LEAF[:])
-		hash_write(hasher, ots_pub.Key())
-		authtree[r-1] = hasher.Sum(nil)
+		common.HashWrite(hasher, id[:])
+		common.HashWrite(hasher, r_be[:])
+		common.HashWrite(hasher, common.D_LEAF[:])
+		common.HashWrite(hasher, ots_pub.Key())
+		authtree[r-1] = common.HashSum(hasher, ots_params.N)
 
 		j = i
 		for j%2 == 1 {
@@ -263,12 +255,12 @@ func GeneratePKTree(tc common.LmsAlgorithmType, otstc common.LmsOtsAlgorithmType
 
 			binary.BigEndian.PutUint32(r_be[:], r)
 
-			hash_write(hasher, id[:])
-			hash_write(hasher, r_be[:])
-			hash_write(hasher, common.D_INTR[:])
-			hash_write(hasher, authtree[2*r-1])
-			hash_write(hasher, authtree[2*r])
-			authtree[r-1] = hasher.Sum(nil)
+			common.HashWrite(hasher, id[:])
+			common.HashWrite(hasher, r_be[:])
+			common.HashWrite(hasher, common.D_INTR[:])
+			common.HashWrite(hasher, authtree[2*r-1])
+			common.HashWrite(hasher, authtree[2*r])
+			authtree[r-1] = common.HashSum(hasher, ots_params.N)
 		}
 	}
 	return authtree, nil

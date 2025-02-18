@@ -67,27 +67,27 @@ func (pub *LmsPublicKey) Verify(msg []byte, sig LmsSignature) bool {
 	binary.BigEndian.PutUint32(node_num_bytes[:], node_num)
 
 	hasher := ots_params.H.New()
-	hash_write(hasher, pub.id[:])
-	hash_write(hasher, node_num_bytes[:])
-	hash_write(hasher, common.D_LEAF[:])
-	hash_write(hasher, key_candidate.Key())
-	tmp := hasher.Sum(nil)
+	common.HashWrite(hasher, pub.id[:])
+	common.HashWrite(hasher, node_num_bytes[:])
+	common.HashWrite(hasher, common.D_LEAF[:])
+	common.HashWrite(hasher, key_candidate.Key())
+	tmp := common.HashSum(hasher, ots_params.N)
 
 	for i := 0; i < height; i++ {
 		binary.BigEndian.PutUint32(tmp_be[:], node_num>>1)
 
 		hasher := ots_params.H.New()
-		hash_write(hasher, pub.id[:])
-		hash_write(hasher, tmp_be[:])
-		hash_write(hasher, common.D_INTR[:])
+		common.HashWrite(hasher, pub.id[:])
+		common.HashWrite(hasher, tmp_be[:])
+		common.HashWrite(hasher, common.D_INTR[:])
 		if node_num%2 == 1 {
-			hash_write(hasher, sig.path[i])
-			hash_write(hasher, tmp)
+			common.HashWrite(hasher, sig.path[i])
+			common.HashWrite(hasher, tmp)
 		} else {
-			hash_write(hasher, tmp)
-			hash_write(hasher, sig.path[i])
+			common.HashWrite(hasher, tmp)
+			common.HashWrite(hasher, sig.path[i])
 		}
-		tmp = hasher.Sum(nil)
+		tmp = common.HashSum(hasher, ots_params.N)
 		node_num >>= 1
 	}
 	return subtle.ConstantTimeCompare(tmp, pub.k) == 1
@@ -143,7 +143,7 @@ func LmsPublicKeyFromBytes(b []byte) (LmsPublicKey, error) {
 		return LmsPublicKey{}, err
 	}
 	// The OTS typecode is bytes 4-7 (4 bytes)
-	otstype, err := common.Uint32ToLmsType(binary.BigEndian.Uint32(b[4:8])).LmsOtsType()
+	otstype, err := common.Uint32ToLmotsType(binary.BigEndian.Uint32(b[4:8])).LmsOtsType()
 	if err != nil {
 		return LmsPublicKey{}, err
 	}

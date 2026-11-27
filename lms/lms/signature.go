@@ -68,7 +68,12 @@ func LmsSignatureFromBytes(b []byte) (LmsSignature, error) {
 		return LmsSignature{}, err
 	}
 	otsigmax := 4 + otssiglen
-	if uint64(4+len(b)) <= otsigmax {
+	// The LMS typecode is the 4 bytes at b[otsigmax:otsigmax+4], so the buffer
+	// must be at least otsigmax+4 long to read it. The previous guard compared
+	// 4+len(b) against otsigmax, which admitted any len(b) in the range
+	// [otsigmax-3, otsigmax+3] and then panicked on the slice below with
+	// "slice bounds out of range". Compare the length directly instead.
+	if uint64(len(b)) < otsigmax+4 {
 		// We are only ensuring that we can read the LMS typecode
 		return LmsSignature{}, errors.New("LmsSignatureFromBytes(): Signature is too short for LM-OTS typecode")
 	}
